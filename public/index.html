@@ -31,27 +31,25 @@
     /* TOP BAR */
     .topbar {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      gap: 16px;
       padding: 24px 32px;
       border-bottom: 1px solid var(--border);
     }
 
-    .left {
-      display: flex;
-      align-items: center;
-      gap: 16px;
+    .avatar {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--surface);
     }
 
-    .avatar {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     .welcome span {
@@ -60,22 +58,10 @@
     }
 
     .welcome strong {
-      font-size: 20px;
+      display: block;
+      font-size: 22px;
       font-weight: 600;
       letter-spacing: -0.3px;
-    }
-
-    .auth button {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 10px 16px;
-      cursor: pointer;
-      font-weight: 500;
-    }
-
-    .auth button:hover {
-      background: #ededf0;
     }
 
     /* CONTENT */
@@ -99,8 +85,8 @@
 
     .card {
       height: 160px;
-      border-radius: 24px;
-      background: var(--surface);
+      border-radius: 26px;
+      background: linear-gradient(180deg, #f7f7f9, #ededf0);
       border: 1px solid var(--border);
     }
 
@@ -117,50 +103,6 @@
       backdrop-filter: blur(12px);
       border-top: 1px solid var(--border);
     }
-
-    /* MODAL */
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.4);
-      display: none;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal-box {
-      background: #fff;
-      border-radius: 28px;
-      padding: 32px;
-      width: 320px;
-      text-align: center;
-      box-shadow: 0 40px 80px rgba(0,0,0,.2);
-    }
-
-    .modal-box h2 {
-      margin: 0 0 20px;
-      font-size: 22px;
-    }
-
-    .modal-box input {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 16px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      font-size: 15px;
-    }
-
-    .modal-box button {
-      width: 100%;
-      padding: 12px;
-      border-radius: 16px;
-      border: none;
-      background: #000;
-      color: #fff;
-      font-size: 15px;
-      cursor: pointer;
-    }
   </style>
 </head>
 
@@ -168,25 +110,13 @@
 
 <!-- TOP BAR -->
 <div class="topbar">
-  <div class="left">
-    <div class="avatar" id="avatar">
-      <!-- Anonymous SVG -->
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-        <path d="M4 12c3-6 13-6 16 0" stroke="#6e6e73" stroke-width="1.5"/>
-        <path d="M7 12c2-4 8-4 10 0" stroke="#6e6e73" stroke-width="1.5"/>
-        <circle cx="9" cy="12" r="1" fill="#6e6e73"/>
-        <circle cx="15" cy="12" r="1" fill="#6e6e73"/>
-      </svg>
-    </div>
-
-    <div class="welcome">
-      <span>Hoşgeldiniz</span>
-      <strong id="username">User!</strong>
-    </div>
+  <div class="avatar">
+    <img src="https://image2url.com/r2/default/images/1770412554126-dc2c1693-a940-47a7-9e53-6e1524fc219c.png" alt="Anonymous">
   </div>
 
-  <div class="auth" id="auth">
-    <button onclick="openModal()">Hesap Aç / Giriş Yap</button>
+  <div class="welcome">
+    <span>Hoşgeldiniz</span>
+    <strong>User!</strong>
   </div>
 </div>
 
@@ -201,48 +131,14 @@
     <div class="card"></div>
     <div class="card"></div>
     <div class="card"></div>
+    <div class="card"></div>
+    <div class="card"></div>
   </div>
 </div>
 
 <footer>
   eymenderdiyok.com.tr
 </footer>
-
-<!-- MODAL -->
-<div class="modal" id="modal">
-  <div class="modal-box">
-    <h2>Hesap Oluştur</h2>
-    <input id="nameInput" placeholder="Kullanıcı adı">
-    <button onclick="saveUser()">Devam Et</button>
-  </div>
-</div>
-
-<script>
-  const usernameEl = document.getElementById("username");
-  const authEl = document.getElementById("auth");
-  const modal = document.getElementById("modal");
-
-  const savedUser = localStorage.getItem("username");
-  if (savedUser) {
-    usernameEl.textContent = savedUser + "!";
-    authEl.style.display = "none";
-  }
-
-  function openModal() {
-    modal.style.display = "flex";
-  }
-
-  function saveUser() {
-    const name = document.getElementById("nameInput").value.trim();
-    if (!name) return;
-    localStorage.setItem("username", name);
-    location.reload();
-  }
-
-  modal.onclick = e => {
-    if (e.target === modal) modal.style.display = "none";
-  };
-</script>
 
 </body>
 </html>
