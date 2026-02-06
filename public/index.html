@@ -4,83 +4,134 @@
   <meta charset="UTF-8" />
   <title>Eymen Derdiyok Games</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
-    :root{--bg:#f5f5f7;--card:#fff;--border:#e5e5ea;--text:#1c1c1e;--sub:#6e6e73}
-    *{box-sizing:border-box;margin:0;padding:0;font-family:Inter,-apple-system,BlinkMacSystemFont,sans-serif}
-    body{background:var(--bg);color:var(--text);min-height:100vh}
-    header{height:70px;background:rgba(255,255,255,.8);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px}
-    .logo{display:flex;align-items:center;gap:14px}
-    .logo img{width:38px;height:38px;border-radius:50%}
-    .logo h1{font-size:18px;font-weight:600}
-    .user{font-size:14px;color:var(--sub)}
-    main{padding:40px;max-width:1200px;margin:auto}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:24px}
-    .game{height:150px;border-radius:18px;border:1px solid var(--border);background:linear-gradient(135deg,#f2f2f2,#e6e6e6);display:flex;align-items:center;justify-content:center;color:#9e9ea3}
-    footer{text-align:center;padding:40px 20px;color:var(--sub);font-size:13px}
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f5f5f7;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      padding: 20px 30px;
+      background: white;
+      box-shadow: 0 1px 10px rgba(0,0,0,.05);
+    }
+    header img {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+    header h1 {
+      font-size: 20px;
+      margin: 0;
+      flex: 1;
+    }
+    #user {
+      font-weight: 500;
+      color: #555;
+    }
 
-    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center}
-    .modal{background:#fff;border-radius:22px;padding:28px;width:92%;max-width:420px}
-    .btn{width:100%;padding:14px;border-radius:12px;border:1px solid var(--border);background:#fff;margin-bottom:12px;cursor:pointer}
-    .btn.black{background:#000;color:#fff;border:none}
+    .auth {
+      max-width: 360px;
+      margin: 80px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 18px;
+      box-shadow: 0 10px 40px rgba(0,0,0,.08);
+    }
+    .auth button {
+      width: 100%;
+      padding: 14px;
+      margin-bottom: 12px;
+      font-size: 16px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      background: #111;
+      color: white;
+    }
+    .guest {
+      background: #e5e5ea;
+      color: #000;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 20px;
+      padding: 30px;
+    }
+    .card {
+      height: 140px;
+      background: #e5e5ea;
+      border-radius: 18px;
+    }
   </style>
 </head>
 
 <body>
+
 <header>
-  <div class="logo">
-    <img src="https://image2url.com/r2/default/images/1770412554126-dc2c1693-a940-47a7-9e53-6e1524fc219c.png">
-    <h1>Eymen Derdiyok Games</h1>
-  </div>
-  <div class="user" id="user">Misafir</div>
+  <img src="https://image2url.com/r2/default/images/1770412554126-dc2c1693-a940-47a7-9e53-6e1524fc219c.png">
+  <h1>Eymen Derdiyok Games</h1>
+  <div id="user">Misafir</div>
 </header>
 
-<main>
-  <div class="grid">
-    <div class="game">Yakında</div>
-    <div class="game">Yakında</div>
-    <div class="game">Yakında</div>
-  </div>
-</main>
+<div class="auth" id="authBox">
+  <button onclick="oauth('apple')">Apple ile giriş</button>
+  <button onclick="oauth('google')">Google ile giriş</button>
+  <button onclick="oauth('azure')">Microsoft ile giriş</button>
+  <button class="guest" onclick="guest()">Misafir olarak gir</button>
+</div>
 
-<footer>eymenderdiyok.com.tr</footer>
-
-<div class="overlay" id="auth">
-  <div class="modal">
-    <button class="btn" onclick="oauth('google')">Google ile giriş</button>
-    <button class="btn" onclick="oauth('apple')">Apple ile giriş</button>
-    <button class="btn" onclick="oauth('azure')">Microsoft ile giriş</button>
-    <button class="btn black" onclick="guest()">Misafir olarak gir</button>
-  </div>
+<div class="grid" id="games" style="display:none;">
+  <div class="card"></div>
+  <div class="card"></div>
+  <div class="card"></div>
 </div>
 
 <script>
-  const supabase = supabaseJs.createClient(
+  const supabaseClient = supabase.createClient(
     'https://yzmnllfpnsepxnfjmlzk.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl6bW5sbGZwbnNlcHhuZmptbHprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzOTY5MjgsImV4cCI6MjA4NTk3MjkyOH0.Pj3AEPuw7gjbfWQPnrmf5YlgaGoNPZ-pGu9gn8vsAPk'
   )
 
-  const authBox = document.getElementById('auth')
   const userText = document.getElementById('user')
+  const authBox = document.getElementById('authBox')
+  const games = document.getElementById('games')
 
-  supabase.auth.getSession().then(({ data }) => {
-    if (!data.session) {
-      authBox.style.display = 'flex'
-    } else {
-      userText.innerText = data.session.user.email ?? 'Kullanıcı'
-    }
-  })
-
-  async function oauth(provider){
-    await supabase.auth.signInWithOAuth({ provider })
+  async function oauth(provider) {
+    await supabaseClient.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: 'https://eymenderdiyok.com.tr'
+      }
+    })
   }
 
-  function guest(){
+  function guest() {
     userText.innerText = 'Misafir'
     authBox.style.display = 'none'
+    games.style.display = 'grid'
   }
+
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (session) {
+      userText.innerText =
+        session.user.user_metadata?.full_name ||
+        session.user.email ||
+        'Kullanıcı'
+
+      authBox.style.display = 'none'
+      games.style.display = 'grid'
+    }
+  })
 </script>
+
 </body>
 </html>
