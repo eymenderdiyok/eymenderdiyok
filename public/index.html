@@ -15,7 +15,6 @@
       --border: #e5e5ea;
       --text: #1c1c1e;
       --sub: #6e6e73;
-      --placeholder: #e9e9ed;
     }
 
     * {
@@ -32,23 +31,27 @@
     /* TOP BAR */
     .topbar {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 16px;
       padding: 24px 32px;
       border-bottom: 1px solid var(--border);
+    }
+
+    .left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
     }
 
     .avatar {
       width: 44px;
       height: 44px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #d1d1d6, #f5f5f7);
+      background: var(--surface);
       border: 1px solid var(--border);
-    }
-
-    .welcome {
       display: flex;
-      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
 
     .welcome span {
@@ -62,9 +65,22 @@
       letter-spacing: -0.3px;
     }
 
+    .auth button {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .auth button:hover {
+      background: #ededf0;
+    }
+
     /* CONTENT */
     .content {
-      padding: 40px 32px 80px;
+      padding: 40px 32px 100px;
       max-width: 1400px;
       margin: auto;
     }
@@ -72,11 +88,9 @@
     .section-title {
       font-size: 22px;
       font-weight: 600;
-      letter-spacing: -0.5px;
       margin-bottom: 24px;
     }
 
-    /* GRID */
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -88,76 +102,147 @@
       border-radius: 24px;
       background: var(--surface);
       border: 1px solid var(--border);
-      transition: transform .3s ease, box-shadow .3s ease;
     }
 
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 20px 40px rgba(0,0,0,.06);
-    }
-
-    /* EMPTY STATE */
-    .empty {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--sub);
-      font-size: 14px;
-      background: linear-gradient(
-        135deg,
-        var(--placeholder),
-        var(--surface)
-      );
-    }
-
-    /* FOOTER */
     footer {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      padding: 16px;
+      padding: 14px;
       text-align: center;
       font-size: 12px;
       color: var(--sub);
-      background: rgba(255,255,255,.8);
-      backdrop-filter: blur(10px);
+      background: rgba(255,255,255,.85);
+      backdrop-filter: blur(12px);
       border-top: 1px solid var(--border);
+    }
+
+    /* MODAL */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-box {
+      background: #fff;
+      border-radius: 28px;
+      padding: 32px;
+      width: 320px;
+      text-align: center;
+      box-shadow: 0 40px 80px rgba(0,0,0,.2);
+    }
+
+    .modal-box h2 {
+      margin: 0 0 20px;
+      font-size: 22px;
+    }
+
+    .modal-box input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 16px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      font-size: 15px;
+    }
+
+    .modal-box button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 16px;
+      border: none;
+      background: #000;
+      color: #fff;
+      font-size: 15px;
+      cursor: pointer;
     }
   </style>
 </head>
 
 <body>
 
-  <!-- TOP BAR -->
-  <div class="topbar">
-    <div class="avatar"></div>
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="left">
+    <div class="avatar" id="avatar">
+      <!-- Anonymous SVG -->
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+        <path d="M4 12c3-6 13-6 16 0" stroke="#6e6e73" stroke-width="1.5"/>
+        <path d="M7 12c2-4 8-4 10 0" stroke="#6e6e73" stroke-width="1.5"/>
+        <circle cx="9" cy="12" r="1" fill="#6e6e73"/>
+        <circle cx="15" cy="12" r="1" fill="#6e6e73"/>
+      </svg>
+    </div>
+
     <div class="welcome">
       <span>Hoşgeldiniz</span>
-      <strong>User!</strong>
+      <strong id="username">User!</strong>
     </div>
   </div>
 
-  <!-- CONTENT -->
-  <div class="content">
-    <div class="section-title">Oyunlar</div>
-
-    <div class="grid">
-      <!-- Empty placeholders -->
-      <div class="card empty">Yakında</div>
-      <div class="card empty"></div>
-      <div class="card empty"></div>
-      <div class="card empty"></div>
-      <div class="card empty"></div>
-      <div class="card empty"></div>
-      <div class="card empty"></div>
-      <div class="card empty"></div>
-    </div>
+  <div class="auth" id="auth">
+    <button onclick="openModal()">Hesap Aç / Giriş Yap</button>
   </div>
+</div>
 
-  <footer>
-    eymenderdiyok.com.tr
-  </footer>
+<!-- CONTENT -->
+<div class="content">
+  <div class="section-title">Oyunlar</div>
+
+  <div class="grid">
+    <div class="card"></div>
+    <div class="card"></div>
+    <div class="card"></div>
+    <div class="card"></div>
+    <div class="card"></div>
+    <div class="card"></div>
+  </div>
+</div>
+
+<footer>
+  eymenderdiyok.com.tr
+</footer>
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <h2>Hesap Oluştur</h2>
+    <input id="nameInput" placeholder="Kullanıcı adı">
+    <button onclick="saveUser()">Devam Et</button>
+  </div>
+</div>
+
+<script>
+  const usernameEl = document.getElementById("username");
+  const authEl = document.getElementById("auth");
+  const modal = document.getElementById("modal");
+
+  const savedUser = localStorage.getItem("username");
+  if (savedUser) {
+    usernameEl.textContent = savedUser + "!";
+    authEl.style.display = "none";
+  }
+
+  function openModal() {
+    modal.style.display = "flex";
+  }
+
+  function saveUser() {
+    const name = document.getElementById("nameInput").value.trim();
+    if (!name) return;
+    localStorage.setItem("username", name);
+    location.reload();
+  }
+
+  modal.onclick = e => {
+    if (e.target === modal) modal.style.display = "none";
+  };
+</script>
 
 </body>
 </html>
