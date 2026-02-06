@@ -36,15 +36,15 @@
       color: #555;
     }
 
-    /* Modal Arka Planı (Pop-up) */
+    /* Pop-up Modal Tasarımı */
     #modalWrapper {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.5); /* Arka planı karartır */
-      backdrop-filter: blur(8px);    /* Arka planı flulaştırır */
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -75,18 +75,28 @@
       border-radius: 12px;
       border: none;
       cursor: pointer;
-      background: #111;
+      font-weight: 600;
+      transition: transform 0.1s;
+    }
+
+    .auth button:active {
+      transform: scale(0.98);
+    }
+
+    .btn-google {
+      background: #4285F4;
       color: white;
-      transition: opacity 0.2s;
     }
 
-    .auth button:hover {
-      opacity: 0.8;
+    .btn-microsoft {
+      background: #2F2F2F;
+      color: white;
     }
 
-    .guest {
-      background: #e5e5ea !important;
-      color: #000 !important;
+    .btn-guest {
+      background: #e5e5ea;
+      color: #000;
+      margin-top: 8px;
     }
 
     .grid {
@@ -114,10 +124,9 @@
 <div id="modalWrapper">
   <div class="auth" id="authBox">
     <h2>Giriş Yap</h2>
-    <button onclick="oauth('apple')">Apple ile giriş</button>
-    <button onclick="oauth('google')">Google ile giriş</button>
-    <button onclick="oauth('azure')">Microsoft ile giriş</button>
-    <button class="guest" onclick="guest()">Misafir olarak devam et</button>
+    <button class="btn-google" onclick="oauth('google')">Google ile giriş</button>
+    <button class="btn-microsoft" onclick="oauth('azure')">Microsoft ile giriş</button>
+    <button class="btn-guest" onclick="guest()">Misafir olarak devam et</button>
   </div>
 </div>
 
@@ -138,17 +147,18 @@
   const games = document.getElementById('games')
 
   async function oauth(provider) {
-    await supabaseClient.auth.signInWithOAuth({
+    const { error } = await supabaseClient.auth.signInWithOAuth({
       provider,
       options: {
         redirectTo: 'https://eymenderdiyok.com.tr'
       }
     })
+    if (error) console.error('Giriş hatası:', error.message)
   }
 
   function guest() {
     userText.innerText = 'Misafir'
-    modalWrapper.style.display = 'none' // Modalı kapat
+    modalWrapper.style.display = 'none'
     games.style.display = 'grid'
   }
 
@@ -159,7 +169,7 @@
         session.user.email ||
         'Kullanıcı'
 
-      modalWrapper.style.display = 'none' // Giriş başarılıysa modalı kapat
+      modalWrapper.style.display = 'none'
       games.style.display = 'grid'
     }
   })
