@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
@@ -47,17 +47,6 @@
       letter-spacing: -0.022em;
     }
 
-    #user-status {
-      font-size: 13px;
-      font-weight: 600;
-      color: #86868b;
-      background: #e8e8ed;
-      padding: 6px 14px;
-      border-radius: 20px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
     .container {
       max-width: 1400px;
       margin: 0 auto;
@@ -66,31 +55,25 @@
 
     .grid {
       display: grid;
-      /* Wide (Geniş) kartlar için min-width 320px */
       grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
       gap: 25px;
     }
 
-    /* KART TASARIMI */
     .card {
       height: 180px;
       border-radius: 22px;
-      /* Arka plan resmi ayarları */
       background-size: cover;
       background-position: center;
       background-color: #fff;
-      
       box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-      border: 1px solid rgba(0,0,0,0.03);
       transition: all 0.4s cubic-bezier(0.15, 0, 0.2, 1);
-      
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
       padding: 24px;
       position: relative;
       overflow: hidden;
-      text-decoration: none; /* Link alt çizgisini kaldır */
+      text-decoration: none;
     }
 
     .card:hover {
@@ -98,7 +81,6 @@
       box-shadow: 0 20px 40px rgba(0,0,0,0.15);
     }
 
-    /* Resimlerin üzerine yazı gelince okunsun diye gölge efekti */
     .card::before {
       content: "";
       position: absolute;
@@ -112,27 +94,8 @@
       z-index: 2;
       font-weight: 700;
       font-size: 20px;
-      color: white; /* Resim üstünde beyaz yazı */
-      text-shadow: 0 2px 4px rgba(0,0,0,0.3); /* Okunabilirlik için gölge */
-      letter-spacing: -0.01em;
-    }
-
-    /* Diğer (Henüz eklenmemiş) oyunlar için stil */
-    .card.placeholder {
-      background: #ffffff;
-    }
-    .card.placeholder .card-title {
-      color: #1d1d1f;
-      text-shadow: none;
-    }
-    .card.placeholder::before {
-      display: none;
-    }
-
-    @media (max-width: 600px) {
-      header { padding: 12px 20px; }
-      .grid { grid-template-columns: 1fr; }
-      .card { height: 160px; }
+      color: white;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
   </style>
 </head>
@@ -141,22 +104,17 @@
 <header>
   <img src="https://image2url.com/r2/default/images/1770412554126-dc2c1693-a940-47a7-9e53-6e1524fc219c.png" alt="Logo">
   <h1>Eymen Derdiyok Games</h1>
-  <div id="user-status">Misafir</div>
 </header>
 
 <div class="container">
   <div class="grid">
-
-    <a href="https://poki.com/tr/g/a-small-world-cup" target="_blank" class="card" 
-       style="background-image: url('https://img.poki.com/cdn-cgi/image/quality=78,width=600,height=600,fit=cover,f=auto/b5bd54053876e5d61488c94294060858.png');">
+    
+    <a href="a-small-world-cup.html" class="card" 
+       style="background-image: url('https://image2url.com/r2/default/images/1770442828571-9f39f0a9-82a5-4302-8207-196ba0358c54.png');">
       <span class="card-title">A Small World Cup</span>
     </a>
 
-    <div class="card placeholder"><span class="card-title">Yakında...</span></div>
-    <div class="card placeholder"><span class="card-title">Yakında...</span></div>
-    <div class="card placeholder"><span class="card-title">Yakında...</span></div>
-    <div class="card placeholder"><span class="card-title">Yakında...</span></div>
-    <div class="card placeholder"><span class="card-title">Yakında...</span></div>
+    <div class="card" style="background: #fff;"><span class="card-title" style="color:#333; text-shadow:none;">Yakında...</span></div>
 
   </div>
 </div>
