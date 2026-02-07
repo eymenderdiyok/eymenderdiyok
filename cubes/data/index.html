@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Cubes 2048 io | Engine</title>
+  <style>
+    /* Apple Akıcı Animasyonlar */
+    @keyframes applePulse {
+      0% { transform: scale(1); opacity: 0.8; }
+      100% { transform: scale(1.05); opacity: 1; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    * {
+      padding: 0;
+      margin: 0;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body, html {
+      position: absolute;
+      margin: 0;
+      padding: 0;
+      top: 0; right: 0; left: 0; bottom: 0;
+      overflow: hidden;
+      background-color: #000; /* Oyun odaklı siyah arka plan */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+    }
+
+    /* Modern Yükleme Ekranı */
+    #loading {
+      position: fixed;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    .loader-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 15px;
+      background: linear-gradient(135deg, #5e5ce6 0%, #a29bfe 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 30px;
+      box-shadow: 0 10px 25px rgba(94, 92, 230, 0.4);
+      animation: applePulse 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .loader-text {
+      color: #86868b;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    #ui {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 99;
+      pointer-events: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="loading">
+    <div class="loader-icon">🧊</div>
+    <div class="loader-text">YÜKLENİYOR</div>
+  </div>
+
+  <div id="ui"></div>
+
+  <script src="main.js"></script>
+  <script src="js/analytics_ubg_v1_4.js"></script>
+  <script src="js/ubg235_client_v1_1.js"></script>
+
+  <script>
+    // Oyun yüklendiğinde yükleme ekranını Apple tarzı fade-out ile kaldır
+    window.addEventListener('load', function() {
+      const loader = document.getElementById('loading');
+      loader.style.transition = 'opacity 0.5s ease';
+      loader.style.opacity = '0';
+      setTimeout(() => loader.style.display = 'none', 500);
+    });
+  </script>
+</body>
+</html>
