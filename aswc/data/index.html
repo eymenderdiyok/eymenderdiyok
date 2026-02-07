@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+	<title>Oyun Motoru</title>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="HandheldFriendly" content="true" />
+
+	<style type="text/css">
+		* { padding: 0; margin: 0; }
+		html, body {
+			background: #000; /* Oyun içi yükleme ekranı siyah kalsın */
+			color: #fff;
+			overflow: hidden;
+			touch-action: none;
+		}
+		canvas {
+			touch-action: none;
+			user-select: none;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="c2canvasdiv">
+		<canvas id="c2canvas" width="700" height="400">
+			<h1>Tarayıcınız HTML5 desteklemiyor.</h1>
+		</canvas>
+	</div>
+
+	<script src="jquery-3.4.1.min.js"></script>
+	<script src="c2runtime.js"></script>
+
+	<script>
+		// Construct 2 motorunu başlatır
+		jQuery(document).ready(function () {			
+			cr_createRuntime("c2canvas");
+		});
+		
+		// Başka sekmeye geçince oyunu dondurur (CPU tasarrufu)
+		function onVisibilityChanged() {
+			if (document.hidden || document.mozHidden || document.webkitHidden || document.msHidden)
+				cr_setSuspended(true);
+			else
+				cr_setSuspended(false);
+		};
+		document.addEventListener("visibilitychange", onVisibilityChanged, false);
+	</script>
+</body>
+</html>
