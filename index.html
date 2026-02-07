@@ -5,161 +5,196 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eymen Derdiyok Games</title>
     
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script src="https://www.google.com/recaptcha/api.js?render=6Lc4w2MsAAAAAOCO0eGxoKRbC_c9vGp3TPSsG3zf"></script>
 
     <style>
+        :root {
+            --apple-blue: #0071e3;
+            --apple-bg: #f5f5f7;
+            --glass: rgba(255, 255, 255, 0.7);
+        }
+
         body {
             margin: 0;
             padding: 0;
-            background-color: #f5f5f7;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
+            background-color: var(--apple-bg);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+            overflow: hidden; /* Giriş yapana kadar kaydırma kapalı */
         }
 
-        /* CAPTCHA GATE SCREEN */
+        /* ULTRA MODERN GATEWAY */
         #captcha-gate {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #ffffff;
+            background: radial-gradient(circle at center, #ffffff 0%, #ececec 100%);
             z-index: 10000;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: opacity 0.5s ease;
+            transition: all 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+        }
+
+        .gate-content {
+            text-align: center;
+            animation: contentFadeUp 1.2s ease;
+        }
+
+        @keyframes contentFadeUp {
+            from { opacity: 0; transform: translateY(30px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .gate-title {
-            font-size: 24px;
+            font-size: clamp(32px, 8vw, 56px);
             font-weight: 700;
-            color: #1d1d1f;
-            margin-bottom: 25px;
+            letter-spacing: -0.04em;
+            background: linear-gradient(180deg, #1d1d1f 0%, #434344 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
         }
 
-        /* ANA İÇERİK (BAŞTA GİZLİ) */
+        /* YÜKLENİYOR ANİMASYONU (PRO) */
+        .status-container {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #d1d1d6;
+            border-top: 3px solid var(--apple-blue);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .status-text {
+            font-size: 14px;
+            color: #86868b;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+        }
+
+        /* ANA SİTE (ANİMASYONLU GEÇİŞ) */
         #main-site {
+            opacity: 0;
+            transform: scale(1.05);
+            transition: all 1s cubic-bezier(0.65, 0, 0.35, 1);
             display: none;
             width: 100%;
             flex-direction: column;
             align-items: center;
+            padding-bottom: 50px;
         }
 
-        /* SENİN ORİJİNAL APPLE STYLE NAVBARIN */
         .navbar {
             width: 100%;
             max-width: 1000px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px;
+            padding: 30px 20px;
             box-sizing: border-box;
-            margin-top: 20px;
         }
 
-        .profile-section {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
         .profile-img {
-            width: 45px;
-            height: 45px;
-            background-color: #d1d1d6;
+            width: 48px; height: 48px;
+            background: white;
             border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            border: 2px solid white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        .profile-img svg {
-            width: 28px;
-            height: 28px;
-            fill: white;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.06);
         }
 
         .brand-title {
-            font-size: 26px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            color: #1d1d1f;
-            margin: 0;
+            font-size: 24px; font-weight: 700; color: #1d1d1f;
         }
 
         .guest-status {
-            font-size: 16px;
-            font-weight: 500;
-            color: #86868b;
-            background: white;
-            padding: 8px 16px;
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 8px 18px;
             border-radius: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            font-size: 14px;
+            font-weight: 600;
+            color: #1d1d1f;
+            border: 1px solid rgba(255,255,255,0.3);
         }
 
-        /* GRID SİSTEMİ */
         .container {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            width: 90%;
-            max-width: 800px;
-            padding: 40px 20px;
+            gap: 25px;
+            width: 92%;
+            max-width: 900px;
+            padding: 40px 0;
         }
 
         .game-card {
             text-decoration: none;
-            height: 180px;
-            border-radius: 28px;
+            height: 200px;
+            border-radius: 35px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
-            border: 4px solid white;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            position: relative;
+            overflow: hidden;
         }
 
         .game-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.12);
+            transform: scale(1.02) translateY(-10px);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.12);
         }
 
-        .aswc { background: linear-gradient(135deg, #32d74b 0%, #28cd41 100%); }
-        .cubes { background: linear-gradient(135deg, #5e5ce6 0%, #5856d6 100%); }
+        .aswc { background: linear-gradient(150deg, #32d74b 0%, #28cd41 100%); }
+        .cubes { background: linear-gradient(150deg, #5e5ce6 0%, #5856d6 100%); }
 
-        .emoji { font-size: 50px; margin-bottom: 10px; }
-        .game-title { color: white; font-size: 19px; font-weight: 600; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .emoji { font-size: 60px; margin-bottom: 12px; transition: 0.5s; }
+        .game-card:hover .emoji { transform: scale(1.15) rotate(5deg); }
 
-        footer { margin-top: auto; padding: 40px; color: #86868b; font-size: 13px; }
+        .game-title { 
+            color: white; font-size: 20px; font-weight: 700; margin: 0;
+            letter-spacing: -0.02em;
+        }
 
-        @media (max-width: 600px) {
+        /* RECAPTCHA LOGO GİZLEME (OPSİYONEL - KURALLARA GÖRE) */
+        .grecaptcha-badge { visibility: hidden; }
+
+        @media (max-width: 650px) {
             .container { grid-template-columns: 1fr; }
-            .brand-title { font-size: 20px; }
         }
     </style>
 </head>
 <body>
 
     <div id="captcha-gate">
-        <h2 class="gate-title">eymenderdiyok.com.tr</h2>
-        <div class="g-recaptcha" 
-             data-sitekey="6Lc4w2MsAAAAAOCO0eGxoKRbC_c9vGp3TPSsG3zf" 
-             data-callback="onCaptchaVerify"></div>
+        <div class="gate-content">
+            <h1 class="gate-title">eymenderdiyok.com.tr</h1>
+            <div class="status-container">
+                <div id="status-icon" class="spinner"></div>
+                <div id="status-text" class="status-text">Bağlantı güvenliği doğrulanıyor...</div>
+            </div>
+        </div>
     </div>
 
     <div id="main-site">
         <nav class="navbar">
-            <div class="profile-section">
-                <div class="profile-img">
-                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                </div>
+            <div class="profile-img">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#1d1d1f"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
             </div>
-            <h1 class="brand-title">Eymen Derdiyok Games</h1>
-            <div class="guest-status">Misafir</div>
+            <h1 class="brand-title">Eymen Derdiyok</h1>
+            <div class="guest-status">Premium</div>
         </nav>
 
         <div class="container">
@@ -173,26 +208,45 @@
                 <h2 class="game-title">Cubes 2048.io</h2>
             </a>
         </div>
-
-        <footer>
-            © 2026 eymenderdiyok.com.tr
-        </footer>
     </div>
 
     <script>
-        // 3. Captcha Başarılı Olunca Çalışacak Fonksiyon
-        function onCaptchaVerify(response) {
-            if (response) {
-                const gate = document.getElementById('captcha-gate');
-                const site = document.getElementById('main-site');
+        // reCAPTCHA v3 Otomatik Doğrulama
+        grecaptcha.ready(function() {
+            grecaptcha.execute('6Lc4w2MsAAAAAOCO0eGxoKRbC_c9vGp3TPSsG3zf', {action: 'submit'}).then(function(token) {
+                // Token alındıysa (Bot değilse) siteyi aç
+                if(token) {
+                    unlockExperience();
+                }
+            });
+        });
+
+        function unlockExperience() {
+            const gate = document.getElementById('captcha-gate');
+            const site = document.getElementById('main-site');
+            const statusText = document.getElementById('status-text');
+            const statusIcon = document.getElementById('status-icon');
+
+            // Başarılı durumu animasyonu
+            statusText.innerText = "Erişim Onaylandı";
+            statusText.style.color = "#32d74b";
+            statusIcon.style.borderTopColor = "#32d74b";
+
+            setTimeout(() => {
+                // Kapıyı yukarı kaydırarak yok et (Apple Style)
+                gate.style.transform = "translateY(-100%)";
                 
-                // Kapıyı kapat, siteyi aç
-                gate.style.opacity = '0';
                 setTimeout(() => {
                     gate.style.display = 'none';
                     site.style.display = 'flex';
-                }, 500);
-            }
+                    // Siteyi yavaşça göster
+                    setTimeout(() => {
+                        site.style.opacity = '1';
+                        site.style.transform = 'scale(1)';
+                        document.body.style.overflow = 'auto';
+                    }, 50);
+                }, 800);
+            }, 600);
         }
     </script>
 
