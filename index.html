@@ -21,7 +21,7 @@
             overflow: hidden;
         }
 
-        /* GATE SCREEN */
+        /* GİRİŞ EKRANI */
         #captcha-gate {
             position: fixed; inset: 0;
             background: #ffffff;
@@ -33,67 +33,70 @@
             font-size: clamp(32px, 8vw, 56px);
             font-weight: 700; letter-spacing: -0.05em;
             color: #1d1d1f; margin-bottom: 30px;
-            transition: opacity 0.3s;
+            transition: opacity 0.4s;
         }
 
-        /* LOADER & ANIMATION AREA */
+        /* DİNAMİK LOADER VE TİK ALANI */
         .status-box {
             display: flex; flex-direction: column; align-items: center; gap: 20px;
-            z-index: 10003;
+            position: relative; z-index: 10005;
         }
 
-        #loader {
-            width: 40px; height: 40px;
+        #loader-wrapper {
+            width: 50px; height: 50px;
+            position: relative;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        #loader-circle {
+            width: 100%; height: 100%;
             border: 4px solid #f2f2f2;
             border-top: 4px solid var(--apple-blue);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
-            transition: border-color 0.4s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        #status-text {
-            font-size: 14px; color: #86868b; font-weight: 500;
-            transition: all 0.4s ease;
-        }
-
-        /* SWIRL OVERLAY */
-        #success-overlay {
-            position: fixed; top: 50%; left: 50%;
-            width: 0px; height: 0px;
-            background: var(--success-green);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 10001;
-            opacity: 0;
-            transition: all 0.8s cubic-bezier(0.65, 0, 0.35, 1);
-        }
-
-        .swirl-active {
-            width: 350vmax !important; height: 350vmax !important;
-            opacity: 1 !important;
-            transform: translate(-50%, -50%) rotate(720deg) !important;
-        }
-
-        /* CHECKMARK ICON */
-        #check-container {
-            position: fixed; inset: 0;
-            display: none; flex-direction: column;
-            align-items: center; justify-content: center;
-            z-index: 10002;
-            color: white;
-        }
-
-        #check-icon {
-            width: 100px; height: 100px;
+        /* TİK İKONU (BAŞTA GİZLİ) */
+        #inner-check {
+            position: absolute;
+            width: 25px; height: 25px;
             fill: none; stroke: white; stroke-width: 5;
             stroke-linecap: round; stroke-linejoin: round;
-            stroke-dasharray: 100; stroke-dashoffset: 100;
-            margin-bottom: 20px;
+            stroke-dasharray: 50; stroke-dashoffset: 50;
+            transition: all 0.3s ease;
+            opacity: 0;
         }
 
-        /* DASHBOARD (BAŞTA GİZLİ) */
+        /* SWIRL EFEKTİ (LİDER DAİREDEN BÜYÜYEN) */
+        #swirl-overlay {
+            position: fixed;
+            width: 50px; height: 50px;
+            background: var(--success-green);
+            border-radius: 50%;
+            z-index: 10004;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.9s cubic-bezier(0.65, 0, 0.35, 1);
+            transform: scale(1) rotate(0deg);
+        }
+
+        .swirl-expand {
+            opacity: 1 !important;
+            transform: scale(150) rotate(720deg) !important; /* Loaderdan başlayıp ekranı yutar */
+        }
+
+        #status-text {
+            font-size: 15px; color: #86868b; font-weight: 500;
+            transition: all 0.4s;
+        }
+
+        /* ONAY YAZISI (YEŞİL EKRANDA BEYAZ GÖZÜKECEK) */
+        .white-text { color: white !important; font-size: 24px !important; font-weight: 700 !important; z-index: 10006; }
+
+        /* DASHBOARD */
         #main-site {
             opacity: 0; display: none; width: 100%; flex-direction: column; align-items: center;
             background: var(--apple-bg); min-height: 100vh;
@@ -112,20 +115,17 @@
 <body>
 
     <div id="captcha-gate">
-        <h1 id="domain-text" class="domain-label">eymenderdiyok.com.tr</h1>
+        <h1 id="domain-label" class="domain-label">eymenderdiyok.com.tr</h1>
         <div class="status-box">
-            <div id="loader"></div>
+            <div id="loader-wrapper">
+                <div id="loader-circle"></div>
+                <svg id="inner-check" viewBox="0 0 52 52">
+                    <path d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                </svg>
+                <div id="swirl-overlay"></div>
+            </div>
             <div id="status-text">Bağlantı taranıyor...</div>
         </div>
-    </div>
-
-    <div id="success-overlay"></div>
-
-    <div id="check-container">
-        <svg id="check-icon" viewBox="0 0 52 52">
-            <path d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
-        </svg>
-        <div style="font-size: 24px; font-weight: 700;">Erişim Onaylandı</div>
     </div>
 
     <div id="main-site">
@@ -149,62 +149,57 @@
         grecaptcha.ready(function() {
             grecaptcha.execute('6Lc4w2MsAAAAAOCO0eGxoKRbC_c9vGp3TPSsG3zf', {action: 'submit'}).then(function(token) {
                 if(token) {
-                    executeProSequence();
+                    executeAppleTransition();
                 }
             });
         });
 
-        function executeProSequence() {
-            const loader = document.getElementById('loader');
+        function executeAppleTransition() {
+            const circle = document.getElementById('loader-circle');
+            const check = document.getElementById('inner-check');
             const statusText = document.getElementById('status-text');
-            const domainText = document.getElementById('domain-text');
-            const overlay = document.getElementById('success-overlay');
-            const checkContainer = document.getElementById('check-container');
-            const checkIcon = document.getElementById('check-icon');
+            const domainLabel = document.getElementById('domain-label');
+            const swirl = document.getElementById('swirl-overlay');
             const gate = document.getElementById('captcha-gate');
             const site = document.getElementById('main-site');
 
-            // 1. Yuvarlak yeşil olur ve yazı güncellenir
-            loader.style.borderTopColor = "var(--success-green)";
-            statusText.innerText = "Onaylandı";
-            statusText.style.color = "var(--success-green)";
-
+            // 1. Loader durur ve yeşil tikli daireye dönüşür
+            circle.style.animation = "none";
+            circle.style.borderColor = "var(--success-green)";
+            circle.style.backgroundColor = "var(--success-green)";
+            
             setTimeout(() => {
-                // 2. Swirl ile büyüme başlar, domain yazısı kaybolur
-                domainText.style.opacity = "0";
-                overlay.classList.add('swirl-active');
-                
-                // 3. Ekran kaplanırken Tik ve "Erişim Onaylandı" belirişi
-                setTimeout(() => {
-                    checkContainer.style.display = 'flex';
-                    statusText.style.display = 'none';
-                    loader.style.display = 'none';
-                    
-                    // Tik animasyonu çizimi
-                    setTimeout(() => {
-                        checkIcon.style.transition = "stroke-dashoffset 0.6s ease";
-                        checkIcon.style.strokeDashoffset = "0";
-                    }, 100);
-                }, 400);
+                check.style.opacity = "1";
+                check.style.strokeDashoffset = "0";
+                statusText.innerText = "Erişim Onaylandı";
+                statusText.style.color = "var(--success-green)";
+            }, 100);
 
-                // 4. Dashboard'a geçiş
+            // 2. Swirl başlar (Tikli daireden büyür)
+            setTimeout(() => {
+                domainLabel.style.opacity = "0";
+                swirl.classList.add('swirl-expand');
+                
+                // Yazıyı yeşil ekranın üstüne taşı ve beyaz yap
+                statusText.classList.add('white-text');
+                
+                // 3. Dashboard'a geçiş
                 setTimeout(() => {
-                    // Sayfa başlığını güncelle
                     document.getElementById('page-title').innerText = "Eymen Derdiyok Games";
+                    gate.style.opacity = "0";
+                    gate.style.transition = "opacity 0.6s ease";
                     
-                    // Geçiş animasyonu
-                    overlay.style.opacity = '0';
-                    checkContainer.style.opacity = '0';
-                    gate.style.display = 'none';
-                    
-                    site.style.display = 'flex';
                     setTimeout(() => {
-                        site.style.opacity = '1';
-                        document.body.style.backgroundColor = "#f5f5f7";
-                        document.body.style.overflow = 'auto';
-                    }, 50);
-                }, 1800);
-            }, 600);
+                        gate.style.display = 'none';
+                        site.style.display = 'flex';
+                        setTimeout(() => {
+                            site.style.opacity = '1';
+                            document.body.style.backgroundColor = "#f5f5f7";
+                            document.body.style.overflow = 'auto';
+                        }, 50);
+                    }, 600);
+                }, 1300);
+            }, 800);
         }
     </script>
 </body>
