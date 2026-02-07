@@ -1,104 +1,127 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8" />
-    <title>A Small World Cup - Eymen Derdiyok Games</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    
-    <style>
-        /* Modern ve Temiz Apple Stili */
-        :root {
-            --header-bg: rgba(28, 28, 30, 0.95);
-            --text-color: #f5f5f7;
-            --accent-color: #0a84ff; /* Apple Mavisi */
-        }
+  <meta charset="UTF-8" />
+  <title>A Small World Cup - Oyna</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  
+  <style>
+    :root {
+      --apple-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --bg-white: #ffffff;
+      --accent-blue: #0071e3;
+    }
 
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #000;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            overflow: hidden; /* Sayfanın kaymasını engeller */
-            display: flex;
-            flex-direction: column;
-        }
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--bg-white);
+      font-family: var(--apple-font);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
 
-        /* Üst Bar Tasarımı */
-        header {
-            height: 50px;
-            background: var(--header-bg);
-            backdrop-filter: blur(15px);
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            z-index: 1000;
-        }
+    /* index.html'deki Header Tasarımının Aynısı */
+    header {
+      display: flex;
+      align-items: center;
+      padding: 15px 40px;
+      background: rgba(255, 255, 255, 0.8); /* Şeffaf beyaz */
+      backdrop-filter: saturate(180%) blur(20px); /* Buzlu cam efekti */
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      height: 44px; /* Apple standart header yüksekliği */
+    }
 
-        /* Geri Dön Butonu */
-        .back-btn {
-            text-decoration: none;
-            color: var(--accent-color);
-            font-size: 16px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            transition: opacity 0.2s;
-        }
+    /* Logo (index.html'deki ile aynı) */
+    header img {
+      width: 35px;
+      height: 35px;
+      border-radius: 8px;
+      margin-right: 15px;
+      object-fit: cover;
+    }
 
-        .back-btn:hover {
-            opacity: 0.7;
-        }
+    /* Ana Menü Butonu */
+    .back-btn {
+      text-decoration: none;
+      color: var(--accent-blue);
+      font-weight: 500;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      transition: opacity 0.2s;
+    }
 
-        .back-btn::before {
-            content: "‹"; /* Apple tarzı geri oku */
-            font-size: 28px;
-            margin-right: 5px;
-            margin-top: -2px;
-        }
+    .back-btn:hover {
+      opacity: 0.7;
+    }
 
-        /* Oyun Başlığı */
-        h1 {
-            flex: 1;
-            text-align: center;
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text-color);
-            margin: 0;
-            margin-right: 60px; /* Butonla ortalamayı dengelemek için */
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
+    .back-btn::before {
+      content: "‹";
+      font-size: 28px;
+      margin-right: 4px;
+      margin-top: -2px;
+    }
 
-        /* Oyunun Açıldığı Alan (iframe) */
-        .game-wrapper {
-            flex: 1;
-            width: 100%;
-            position: relative;
-        }
+    /* Oyun Başlığı (Ortalanmış) */
+    header h1 {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0;
+      color: #1d1d1f;
+      letter-spacing: -0.022em;
+    }
 
-        iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-    </style>
+    /* Oyun Alanı: Padding, Köşe ve Gölge */
+    .game-container {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+      box-sizing: border-box;
+    }
+
+    iframe {
+      width: 100%;
+      max-width: 1100px;
+      height: 100%;
+      border: none;
+      border-radius: 24px; /* Yuvarlak köşeler */
+      box-shadow: 0 20px 50px rgba(0,0,0,0.12); /* Şık gölge */
+      background: #000;
+    }
+
+    @media (max-width: 600px) {
+      header { padding: 10px 20px; }
+      header img { display: none; } /* Mobilde yer açmak için logoyu gizle */
+      .game-container { padding: 15px; }
+    }
+  </style>
 </head>
 <body>
 
-    <header>
-        <a href="../index.html" class="back-btn">Geri Dön</a>
-        <h1>A Small World Cup</h1>
-    </header>
+<header>
+  <img src="https://image2url.com/r2/default/images/1770412554126-dc2c1693-a940-47a7-9e53-6e1524fc219c.png" alt="Logo">
+  <a href="../index.html" class="back-btn">Ana Menü</a>
+  
+  <h1>A Small World Cup</h1>
+</header>
 
-    <div class="game-wrapper">
-        <iframe src="data/index.html" allowfullscreen="true" allow="autoplay; fullscreen; keyboard"></iframe>
-    </div>
+<div class="game-container">
+  <iframe src="data/index.html" allowfullscreen="true" allow="autoplay; fullscreen; keyboard"></iframe>
+</div>
 
 </body>
 </html>
