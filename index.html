@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eymen Derdiyok Games</title>
+    
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
     <style>
         body {
             margin: 0;
@@ -13,9 +16,38 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            min-height: 100vh;
         }
 
-        /* APPLE STYLE NAVBAR / HEADER */
+        /* CAPTCHA GATE SCREEN */
+        #captcha-gate {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #ffffff;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+
+        .gate-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1d1d1f;
+            margin-bottom: 25px;
+        }
+
+        /* ANA İÇERİK (BAŞTA GİZLİ) */
+        #main-site {
+            display: none;
+            width: 100%;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* SENİN ORİJİNAL APPLE STYLE NAVBARIN */
         .navbar {
             width: 100%;
             max-width: 1000px;
@@ -27,7 +59,6 @@
             margin-top: 20px;
         }
 
-        /* Sol: Profil Fotoğrafı */
         .profile-section {
             display: flex;
             align-items: center;
@@ -51,7 +82,6 @@
             fill: white;
         }
 
-        /* Orta: Başlık */
         .brand-title {
             font-size: 26px;
             font-weight: 700;
@@ -60,7 +90,6 @@
             margin: 0;
         }
 
-        /* Sağ: Misafir Yazısı */
         .guest-status {
             font-size: 16px;
             font-weight: 500;
@@ -115,35 +144,57 @@
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="profile-section">
-            <div class="profile-img">
-                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-            </div>
-        </div>
-
-        <h1 class="brand-title">Eymen Derdiyok Games</h1>
-
-        <div class="guest-status">Misafir</div>
-    </nav>
-
-    <div class="container">
-        
-        <a href="/aswc/oyna.html" class="game-card aswc">
-            <div class="emoji">⚽️</div>
-            <h2 class="game-title">A Small World Cup</h2>
-        </a>
-
-        <a href="/cubes/oyna.html" class="game-card cubes">
-            <div class="emoji">🧊</div>
-            <h2 class="game-title">Cubes 2048.io</h2>
-        </a>
-
+    <div id="captcha-gate">
+        <h2 class="gate-title">eymenderdiyok.com.tr</h2>
+        <div class="g-recaptcha" 
+             data-sitekey="6Lc4w2MsAAAAAOCO0eGxoKRbC_c9vGp3TPSsG3zf" 
+             data-callback="onCaptchaVerify"></div>
     </div>
 
-    <footer>
-        © 2026 eymenderdiyok.com.tr
-    </footer>
+    <div id="main-site">
+        <nav class="navbar">
+            <div class="profile-section">
+                <div class="profile-img">
+                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                </div>
+            </div>
+            <h1 class="brand-title">Eymen Derdiyok Games</h1>
+            <div class="guest-status">Misafir</div>
+        </nav>
+
+        <div class="container">
+            <a href="/aswc/oyna.html" class="game-card aswc">
+                <div class="emoji">⚽️</div>
+                <h2 class="game-title">A Small World Cup</h2>
+            </a>
+
+            <a href="/cubes/oyna.html" class="game-card cubes">
+                <div class="emoji">🧊</div>
+                <h2 class="game-title">Cubes 2048.io</h2>
+            </a>
+        </div>
+
+        <footer>
+            © 2026 eymenderdiyok.com.tr
+        </footer>
+    </div>
+
+    <script>
+        // 3. Captcha Başarılı Olunca Çalışacak Fonksiyon
+        function onCaptchaVerify(response) {
+            if (response) {
+                const gate = document.getElementById('captcha-gate');
+                const site = document.getElementById('main-site');
+                
+                // Kapıyı kapat, siteyi aç
+                gate.style.opacity = '0';
+                setTimeout(() => {
+                    gate.style.display = 'none';
+                    site.style.display = 'flex';
+                }, 500);
+            }
+        }
+    </script>
 
 </body>
 </html>
