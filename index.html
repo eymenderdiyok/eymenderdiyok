@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eymen Derdiyok Games</title>
+    <title id="page-title">eymenderdiyok.com.tr</title>
     
     <script src="https://www.google.com/recaptcha/api.js?render=6Lc4w2MsAAAAAOCO0eGxoKRbC_c9vGp3TPSsG3zf"></script>
 
@@ -11,242 +11,175 @@
         :root {
             --apple-blue: #0071e3;
             --apple-bg: #f5f5f7;
-            --glass: rgba(255, 255, 255, 0.7);
+            --success-green: #32d74b;
         }
 
         body {
-            margin: 0;
-            padding: 0;
-            background-color: var(--apple-bg);
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
-            overflow: hidden; /* Giriş yapana kadar kaydırma kapalı */
+            margin: 0; padding: 0;
+            background-color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+            overflow: hidden;
         }
 
-        /* ULTRA MODERN GATEWAY */
+        /* GİRİŞ EKRANI (GATE) */
         #captcha-gate {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, #ffffff 0%, #ececec 100%);
+            position: fixed; inset: 0;
+            background: #ffffff;
             z-index: 10000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: all 0.8s ease;
         }
 
-        .gate-content {
-            text-align: center;
-            animation: contentFadeUp 1.2s ease;
-        }
-
-        @keyframes contentFadeUp {
-            from { opacity: 0; transform: translateY(30px) scale(0.9); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        .gate-title {
+        .domain-label {
             font-size: clamp(32px, 8vw, 56px);
-            font-weight: 700;
-            letter-spacing: -0.04em;
-            background: linear-gradient(180deg, #1d1d1f 0%, #434344 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 15px;
+            font-weight: 700; letter-spacing: -0.05em;
+            color: #1d1d1f; margin-bottom: 30px;
         }
 
-        /* YÜKLENİYOR ANİMASYONU (PRO) */
-        .status-container {
-            margin-top: 40px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
+        /* LOADER VE TİK ANİMASYONU SİSTEMİ */
+        .status-box {
+            display: flex; flex-direction: column; align-items: center; gap: 20px;
+            position: relative;
         }
 
-        .spinner {
-            width: 24px;
-            height: 24px;
-            border: 3px solid #d1d1d6;
-            border-top: 3px solid var(--apple-blue);
+        #loader {
+            width: 40px; height: 40px;
+            border: 4px solid #f2f2f2;
+            border-top: 4px solid var(--apple-blue);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
 
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        .status-text {
-            font-size: 14px;
-            color: #86868b;
-            font-weight: 500;
-            letter-spacing: 0.01em;
-        }
-
-        /* ANA SİTE (ANİMASYONLU GEÇİŞ) */
-        #main-site {
-            opacity: 0;
-            transform: scale(1.05);
-            transition: all 1s cubic-bezier(0.65, 0, 0.35, 1);
-            display: none;
-            width: 100%;
-            flex-direction: column;
-            align-items: center;
-            padding-bottom: 50px;
-        }
-
-        .navbar {
-            width: 100%;
-            max-width: 1000px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 30px 20px;
-            box-sizing: border-box;
-        }
-
-        .profile-img {
-            width: 48px; height: 48px;
-            background: white;
+        /* YEŞİL TİK VE SWIRL EFEKTİ */
+        #success-overlay {
+            position: fixed; top: 50%; left: 50%;
+            width: 0px; height: 0px;
+            background: var(--success-green);
             border-radius: 50%;
+            transform: translate(-50%, -50%);
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.06);
+            z-index: 10001;
+            opacity: 0;
+            transition: all 0.7s cubic-bezier(0.65, 0, 0.35, 1);
         }
 
-        .brand-title {
-            font-size: 24px; font-weight: 700; color: #1d1d1f;
+        /* Büyüme ve Swirl (Dönme) Animasyonu */
+        .swirl-in {
+            width: 300vmax !important; height: 300vmax !important;
+            opacity: 1 !important;
+            transform: translate(-50%, -50%) rotate(720deg) !important;
         }
 
-        .guest-status {
-            background: var(--glass);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            padding: 8px 18px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #1d1d1f;
-            border: 1px solid rgba(255,255,255,0.3);
+        #check-icon {
+            width: 100px; height: 100px;
+            fill: none; stroke: white; stroke-width: 5;
+            stroke-linecap: round; stroke-linejoin: round;
+            stroke-dasharray: 100; stroke-dashoffset: 100;
+            transition: all 0.5s ease 0.4s;
         }
 
-        .container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 25px;
-            width: 92%;
-            max-width: 900px;
-            padding: 40px 0;
+        /* ANA SİTE (GİRİŞTEN SONRA) */
+        #main-site {
+            opacity: 0; display: none; width: 100%; flex-direction: column; align-items: center;
+            background: var(--apple-bg); min-height: 100vh;
         }
 
-        .game-card {
-            text-decoration: none;
-            height: 200px;
-            border-radius: 35px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-            border: 1px solid rgba(255,255,255,0.2);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .game-card:hover {
-            transform: scale(1.02) translateY(-10px);
-            box-shadow: 0 30px 60px rgba(0,0,0,0.12);
-        }
-
+        .navbar { width: 100%; max-width: 1000px; display: flex; justify-content: space-between; align-items: center; padding: 30px 20px; box-sizing: border-box; }
+        .brand-title { font-size: 24px; font-weight: 700; color: #1d1d1f; }
+        
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px; width: 92%; max-width: 900px; padding: 40px 0; }
+        .game-card { text-decoration: none; height: 200px; border-radius: 35px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 20px 40px rgba(0,0,0,0.08); transition: 0.4s; }
         .aswc { background: linear-gradient(150deg, #32d74b 0%, #28cd41 100%); }
         .cubes { background: linear-gradient(150deg, #5e5ce6 0%, #5856d6 100%); }
+        .game-title { color: white; font-size: 20px; font-weight: 700; }
 
-        .emoji { font-size: 60px; margin-bottom: 12px; transition: 0.5s; }
-        .game-card:hover .emoji { transform: scale(1.15) rotate(5deg); }
-
-        .game-title { 
-            color: white; font-size: 20px; font-weight: 700; margin: 0;
-            letter-spacing: -0.02em;
-        }
-
-        /* RECAPTCHA LOGO GİZLEME (OPSİYONEL - KURALLARA GÖRE) */
         .grecaptcha-badge { visibility: hidden; }
-
-        @media (max-width: 650px) {
-            .container { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 650px) { .grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
     <div id="captcha-gate">
-        <div class="gate-content">
-            <h1 class="gate-title">eymenderdiyok.com.tr</h1>
-            <div class="status-container">
-                <div id="status-icon" class="spinner"></div>
-                <div id="status-text" class="status-text">Bağlantı güvenliği doğrulanıyor...</div>
-            </div>
+        <h1 class="domain-label">eymenderdiyok.com.tr</h1>
+        <div class="status-box">
+            <div id="loader"></div>
+            <div id="status-text" style="font-size: 14px; color: #86868b; font-weight: 500;">Bağlantı güvenliği taranıyor...</div>
         </div>
+    </div>
+
+    <div id="success-overlay">
+        <svg id="check-icon" viewBox="0 0 52 52">
+            <path d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
     </div>
 
     <div id="main-site">
         <nav class="navbar">
-            <div class="profile-img">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="#1d1d1f"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-            </div>
-            <h1 class="brand-title">Eymen Derdiyok</h1>
-            <div class="guest-status">Premium</div>
+            <h1 class="brand-title">Eymen Derdiyok Games</h1>
+            <div style="background:white; padding:8px 18px; border-radius:20px; font-size:14px; font-weight:600; box-shadow:0 4px 10px rgba(0,0,0,0.05);">Premium</div>
         </nav>
 
-        <div class="container">
+        <div class="grid">
             <a href="/aswc/oyna.html" class="game-card aswc">
-                <div class="emoji">⚽️</div>
+                <span style="font-size: 50px; margin-bottom: 10px;">⚽️</span>
                 <h2 class="game-title">A Small World Cup</h2>
             </a>
-
             <a href="/cubes/oyna.html" class="game-card cubes">
-                <div class="emoji">🧊</div>
+                <span style="font-size: 50px; margin-bottom: 10px;">🧊</span>
                 <h2 class="game-title">Cubes 2048.io</h2>
             </a>
         </div>
     </div>
 
     <script>
-        // reCAPTCHA v3 Otomatik Doğrulama
         grecaptcha.ready(function() {
             grecaptcha.execute('6Lc4w2MsAAAAAOCO0eGxoKRbC_c9vGp3TPSsG3zf', {action: 'submit'}).then(function(token) {
-                // Token alındıysa (Bot değilse) siteyi aç
                 if(token) {
-                    unlockExperience();
+                    startSuccessAnimation();
                 }
             });
         });
 
-        function unlockExperience() {
+        function startSuccessAnimation() {
+            const loader = document.getElementById('loader');
+            const statusText = document.getElementById('status-text');
+            const overlay = document.getElementById('success-overlay');
+            const checkIcon = document.getElementById('check-icon');
             const gate = document.getElementById('captcha-gate');
             const site = document.getElementById('main-site');
-            const statusText = document.getElementById('status-text');
-            const statusIcon = document.getElementById('status-icon');
+            const title = document.getElementById('page-title');
 
-            // Başarılı durumu animasyonu
+            // 1. Loader durur ve yazı değişir
+            loader.style.display = 'none';
             statusText.innerText = "Erişim Onaylandı";
             statusText.style.color = "#32d74b";
-            statusIcon.style.borderTopColor = "#32d74b";
 
             setTimeout(() => {
-                // Kapıyı yukarı kaydırarak yok et (Apple Style)
-                gate.style.transform = "translateY(-100%)";
+                // 2. Yeşil Swirl Başlar
+                overlay.classList.add('swirl-in');
                 
+                // 3. Tik İşareti Çizilir
                 setTimeout(() => {
+                    checkIcon.style.strokeDashoffset = "0";
+                }, 300);
+
+                // 4. Ekranı Kapladıktan Sonra Siteyi Aç
+                setTimeout(() => {
+                    // Sayfa bilgilerini normale döndür
+                    title.innerText = "Eymen Derdiyok Games";
                     gate.style.display = 'none';
+                    overlay.style.opacity = '0'; // Yeşil perde yavaşça kalkar
+                    
                     site.style.display = 'flex';
-                    // Siteyi yavaşça göster
                     setTimeout(() => {
                         site.style.opacity = '1';
-                        site.style.transform = 'scale(1)';
                         document.body.style.overflow = 'auto';
+                        document.body.style.backgroundColor = "#f5f5f7";
                     }, 50);
-                }, 800);
-            }, 600);
+                }, 1200);
+            }, 500);
         }
     </script>
 
