@@ -43,9 +43,8 @@
             z-index: 10005;
         }
 
-        /* YUVARLAK (BİRAZ DAHA BÜYÜK) */
         #status-circle {
-            width: 60px; height: 60px; /* İstediğin gibi biraz daha büyük */
+            width: 60px; height: 60px;
             border: 5px solid #f2f2f2;
             border-top: 5px solid var(--apple-blue);
             border-radius: 50%;
@@ -58,30 +57,30 @@
 
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* TİK (YUVARLAKLA BİRLİKTE BÜYÜYECEK) */
-        #check-path {
-            fill: none; stroke: white; stroke-width: 5;
-            stroke-linecap: round; stroke-linejoin: round;
-            stroke-dasharray: 100; stroke-dashoffset: 100;
-            transition: stroke-dashoffset 0.4s ease 0.3s;
-        }
-
         /* EXPAND DURUMU (YUVARLAK EKRANI KAPLIYOR) */
         .expand-to-screen {
             animation: none !important;
             background-color: var(--success-green) !important;
             border-color: var(--success-green) !important;
-            transform: scale(80); /* Tüm ekranı kaplayana kadar büyür */
+            transform: scale(85);
             z-index: 10010;
         }
 
-        /* FİNAL İÇERİK (YEŞİL EKRANIN ÜSTÜNDEKİLER) */
+        /* YEŞİL EKRAN ÜSTÜ İÇERİK */
         #overlay-content {
             position: fixed; inset: 0;
             display: none; flex-direction: column;
             align-items: center; justify-content: center;
             z-index: 10020; color: white; opacity: 0;
             transition: opacity 0.5s ease;
+        }
+
+        #final-check {
+            width: 100px; height: 100px;
+            fill: none; stroke: white; stroke-width: 5;
+            stroke-linecap: round; stroke-linejoin: round;
+            stroke-dasharray: 100; stroke-dashoffset: 100;
+            transition: stroke-dashoffset 0.6s ease 0.2s;
         }
 
         .continue-btn {
@@ -108,7 +107,6 @@
         .game-title { color: white; font-size: 20px; font-weight: 700; margin: 0; }
 
         .grecaptcha-badge { visibility: hidden; }
-        @media (max-width: 650px) { .container { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -117,18 +115,14 @@
         <h1 id="domain-label" class="domain-label">eymenderdiyok.com.tr</h1>
         
         <div id="main-anim-container">
-            <div id="status-circle">
-                <svg width="30" height="30" viewBox="0 0 52 52">
-                    <path id="check-path" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
-                </svg>
-            </div>
+            <div id="status-circle"></div>
             <p id="status-text" style="font-size: 15px; color: #86868b; font-weight: 500; margin-top: 20px;">Güvenlik taranıyor...</p>
         </div>
     </div>
 
     <div id="overlay-content">
-        <svg width="100" height="100" viewBox="0 0 52 52">
-            <path fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+        <svg id="final-check" viewBox="0 0 52 52">
+            <path d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
         </svg>
         <h2 style="font-size: 28px; margin-top: 10px;">Erişim Onaylandı</h2>
         <button class="continue-btn" onclick="enterSite()">Devam Et</button>
@@ -163,31 +157,33 @@
 
         function executeProSequence() {
             const circle = document.getElementById('status-circle');
-            const path = document.getElementById('check-path');
             const statusText = document.getElementById('status-text');
             const domainLabel = document.getElementById('domain-label');
             const overlayContent = document.getElementById('overlay-content');
+            const finalCheck = document.getElementById('final-check');
 
-            // 1. Yuvarlak yeşile döner ve küçük tik belirir
+            // 1. Loader durur ve sadece İÇİ BOŞ yeşil yuvarlak olur
             circle.style.animation = "none";
             circle.style.borderColor = "var(--success-green)";
-            circle.style.backgroundColor = "var(--success-green)";
-            path.style.strokeDashoffset = "0";
+            circle.style.backgroundColor = "transparent"; // İçi başta boş
             statusText.innerText = "Onaylandı";
             statusText.style.color = "var(--success-green)";
 
             setTimeout(() => {
-                // 2. Yuvarlak doğrudan büyümeye (expand) başlar
+                // 2. Yuvarlak içi dolarak genişlemeye başlar
                 domainLabel.style.opacity = "0";
                 statusText.style.opacity = "0";
                 circle.classList.add('expand-to-screen');
 
-                // 3. Ekran tamamen yeşil olduğunda içerik belirir
+                // 3. Ekran kaplanınca Beyaz Tik ve Buton gelir
                 setTimeout(() => {
                     overlayContent.style.display = 'flex';
-                    setTimeout(() => { overlayContent.style.opacity = '1'; }, 50);
+                    setTimeout(() => { 
+                        overlayContent.style.opacity = '1'; 
+                        finalCheck.style.strokeDashoffset = "0"; // Tik şimdi çizilir
+                    }, 50);
                 }, 700);
-            }, 1000);
+            }, 600);
         }
 
         function enterSite() {
