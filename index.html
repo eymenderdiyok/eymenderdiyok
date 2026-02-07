@@ -22,7 +22,7 @@
             overflow-x: hidden;
         }
 
-        /* GİRİŞ SİSTEMİ (CAPTCHA) */
+        /* GİRİŞ SİSTEMİ */
         #captcha-gate {
             position: fixed; inset: 0;
             background: #ffffff;
@@ -113,14 +113,13 @@
         }
         .game-card:hover { transform: scale(1.02) translateY(-5px); }
 
-        /* Oyun Renkleri (Gradients) */
+        /* Oyun Renkleri */
         .aswc { background: linear-gradient(150deg, #32d74b 0%, #28cd41 100%); }
         .cubes { background: linear-gradient(150deg, #5e5ce6 0%, #5856d6 100%); }
         .paper { background: linear-gradient(150deg, #ff9f0a 0%, #ff3b30 100%); }
-        .rocket { background: linear-gradient(150deg, #0084ff 0%, #ff8000 100%); } /* Rocket League: Mavi-Turuncu */
 
         .emoji { font-size: 60px; margin-bottom: 12px; }
-        .game-title { color: white; font-size: 20px; font-weight: 700; margin: 0; text-align: center; }
+        .game-title { color: white; font-size: 20px; font-weight: 700; margin: 0; }
 
         .grecaptcha-badge { visibility: hidden; }
         
@@ -169,16 +168,10 @@
                 <div class="emoji">📝</div>
                 <h2 class="game-title">Paper.io</h2>
             </a>
-
-            <a href="/rocket-league/oyna.html" class="game-card rocket">
-                <div class="emoji">🏎️</div>
-                <h2 class="game-title">Rocket League 2D</h2>
-            </a>
         </div>
     </div>
 
     <script>
-        // Captcha ve Animasyon İşlemleri
         grecaptcha.ready(function() {
             grecaptcha.execute('6Lc4w2MsAAAAAOCO0eGxoKRbC_c9vGp3TPSsG3zf', {action: 'submit'}).then(function(token) {
                 if(token) { executeProSequence(); }
