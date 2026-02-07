@@ -3,146 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eymen Derdiyok | Oyunlar</title>
+    <title>Eymen Derdiyok Games</title>
     <style>
-        /* Apple San Francisco Font ve Temiz Arka Plan */
         body {
             margin: 0;
             padding: 0;
-            background-color: #f5f5f7; /* Apple'ın standart açık gri arka planı */
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
-            -webkit-font-smoothing: antialiased;
-            color: #1d1d1f;
+            background-color: #f5f5f7;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        /* Apple Tarzı Header */
-        header {
+        /* APPLE STYLE NAVBAR / HEADER */
+        .navbar {
             width: 100%;
-            padding: 80px 0 50px 0;
-            text-align: center;
-        }
-
-        header h1 {
-            font-size: 56px;
-            font-weight: 600;
-            letter-spacing: -0.015em;
-            margin-bottom: 8px;
-            color: #1d1d1f;
-        }
-
-        header p {
-            font-size: 24px;
-            color: #86868b;
-            font-weight: 400;
-            letter-spacing: 0.007em;
-        }
-
-        /* Oyun Grid Yapısı */
-        .game-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 24px;
-            width: 90%;
             max-width: 1000px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             padding: 20px;
+            box-sizing: border-box;
+            margin-top: 20px;
         }
 
-        /* Apple Kart Tasarımı (Gölgeler ve Geçişler) */
+        /* Sol: Profil Fotoğrafı */
+        .profile-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .profile-img {
+            width: 45px;
+            height: 45px;
+            background-color: #d1d1d6;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border: 2px solid white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .profile-img svg {
+            width: 28px;
+            height: 28px;
+            fill: white;
+        }
+
+        /* Orta: Başlık */
+        .brand-title {
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: #1d1d1f;
+            margin: 0;
+        }
+
+        /* Sağ: Misafir Yazısı */
+        .guest-status {
+            font-size: 16px;
+            font-weight: 500;
+            color: #86868b;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* GRID SİSTEMİ */
+        .container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            width: 90%;
+            max-width: 800px;
+            padding: 40px 20px;
+        }
+
         .game-card {
             text-decoration: none;
+            height: 180px;
+            border-radius: 28px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 240px;
-            border-radius: 30px; /* Daha yumuşak Apple köşeleri */
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.25, 1);
-            position: relative;
-            overflow: hidden;
-            background: #fff;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+            border: 4px solid white;
         }
 
         .game-card:hover {
-            transform: scale(1.02);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.12);
         }
 
-        /* Oyunlara Özel Renk Geçişleri */
-        .aswc {
-            background: linear-gradient(180deg, #32d74b 0%, #28cd41 100%);
-        }
+        .aswc { background: linear-gradient(135deg, #32d74b 0%, #28cd41 100%); }
+        .cubes { background: linear-gradient(135deg, #5e5ce6 0%, #5856d6 100%); }
 
-        .cubes {
-            background: linear-gradient(180deg, #5e5ce6 0%, #5856d6 100%);
-        }
+        .emoji { font-size: 50px; margin-bottom: 10px; }
+        .game-title { color: white; font-size: 19px; font-weight: 600; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 
-        /* Kart İçeriği */
-        .emoji {
-            font-size: 64px;
-            margin-bottom: 15px;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
-        }
+        footer { margin-top: auto; padding: 40px; color: #86868b; font-size: 13px; }
 
-        .game-title {
-            color: white;
-            font-size: 24px;
-            font-weight: 600;
-            margin: 0;
-            letter-spacing: -0.022em;
-        }
-
-        /* Apple Tarzı İnce Butonlar/Rozetler */
-        .badge {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            padding: 6px 14px;
-            border-radius: 40px;
-            color: white;
-            font-size: 13px;
-            font-weight: 500;
-            letter-spacing: 0.01em;
-        }
-
-        footer {
-            margin-top: 100px;
-            color: #86868b;
-            font-size: 14px;
-            padding-bottom: 50px;
-            font-weight: 400;
-        }
-
-        @media (max-width: 734px) {
-            header h1 { font-size: 40px; }
-            header p { font-size: 20px; }
-            .game-grid { grid-template-columns: 1fr; }
+        @media (max-width: 600px) {
+            .container { grid-template-columns: 1fr; }
+            .brand-title { font-size: 20px; }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>Oyun Salonu</h1>
-        <p>Eymen Derdiyok</p>
-    </header>
+    <nav class="navbar">
+        <div class="profile-section">
+            <div class="profile-img">
+                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            </div>
+        </div>
 
-    <div class="game-grid">
+        <h1 class="brand-title">Eymen Derdiyok Games</h1>
+
+        <div class="guest-status">Misafir</div>
+    </nav>
+
+    <div class="container">
         
         <a href="/aswc/oyna.html" class="game-card aswc">
-            <span class="badge">Oyna</span>
             <div class="emoji">⚽️</div>
             <h2 class="game-title">A Small World Cup</h2>
         </a>
 
         <a href="/cubes/oyna.html" class="game-card cubes">
-            <span class="badge">Yeni</span>
             <div class="emoji">🧊</div>
             <h2 class="game-title">Cubes 2048.io</h2>
         </a>
