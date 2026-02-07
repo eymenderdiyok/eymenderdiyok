@@ -19,6 +19,7 @@
       -webkit-font-smoothing: antialiased;
     }
 
+    /* Modern Apple Header */
     header {
       display: flex;
       align-items: center;
@@ -47,6 +48,17 @@
       letter-spacing: -0.022em;
     }
 
+    #user-status {
+      font-size: 13px;
+      font-weight: 600;
+      color: #86868b;
+      background: #e8e8ed;
+      padding: 6px 14px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
     .container {
       max-width: 1400px;
       margin: 0 auto;
@@ -59,6 +71,7 @@
       gap: 25px;
     }
 
+    /* KART TASARIMI */
     .card {
       height: 180px;
       border-radius: 22px;
@@ -66,6 +79,7 @@
       background-position: center;
       background-color: #fff;
       box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+      border: 1px solid rgba(0,0,0,0.03);
       transition: all 0.4s cubic-bezier(0.15, 0, 0.2, 1);
       display: flex;
       flex-direction: column;
@@ -81,11 +95,12 @@
       box-shadow: 0 20px 40px rgba(0,0,0,0.15);
     }
 
+    /* Yazı okunurluğu için görsel üzeri gölge */
     .card::before {
       content: "";
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.6) 100%);
+      background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.75) 100%);
       z-index: 1;
     }
 
@@ -95,7 +110,14 @@
       font-weight: 700;
       font-size: 20px;
       color: white;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+      letter-spacing: -0.01em;
+    }
+
+    @media (max-width: 600px) {
+      header { padding: 12px 20px; }
+      .grid { grid-template-columns: 1fr; }
+      .card { height: 160px; }
     }
   </style>
 </head>
@@ -104,17 +126,20 @@
 <header>
   <img src="https://image2url.com/r2/default/images/1770412554126-dc2c1693-a940-47a7-9e53-6e1524fc219c.png" alt="Logo">
   <h1>Eymen Derdiyok Games</h1>
+  <div id="user-status">Misafir</div>
 </header>
 
 <div class="container">
   <div class="grid">
-    
-    <a href="a-small-world-cup.html" class="card" 
+
+    <a href="aswc/oyna.html" class="card" 
        style="background-image: url('https://image2url.com/r2/default/images/1770442962510-e905aa21-7b0a-4d0c-93ba-3fa4476880bb.webp');">
       <span class="card-title">A Small World Cup</span>
     </a>
 
-    <div class="card" style="background: #fff;"><span class="card-title" style="color:#333; text-shadow:none;">Yakında...</span></div>
+    <div class="card" style="background: #fff; border: 2px dashed #d2d2d7;">
+      <span class="card-title" style="color:#86868b; text-shadow:none;">Yeni Oyunlar Yakında...</span>
+    </div>
 
   </div>
 </div>
