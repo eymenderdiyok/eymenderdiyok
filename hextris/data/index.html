@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang='tr'>
 	<head>
 		<title>Hextris</title>
 		<meta charset="UTF-8">
@@ -15,7 +15,7 @@
 		<script type='text/javascript' src="vendor/jsonfn.min.js"></script>
 		<script type='text/javascript' src="vendor/keypress.min.js"></script>
 		<script type='text/javascript' src="vendor/jquery.js"></script>
-		<script src="vendor/sweet-alert.min.js"></script>
+		<script type='text/javascript' src="vendor/sweet-alert.min.js"></script>
 
 		<script type='text/javascript' src="js/save-state.js"></script>
 		<script type='text/javascript' src="js/view.js"></script>
@@ -33,26 +33,36 @@
 		<script type='text/javascript' src="js/initialization.js"></script>
 		
 		<style>
-			/* Senin sitene uyum sağlaması için arka planı siyah yapalım */
-			body { background-color: #000; overflow: hidden; }
-			#canvas { display: block; margin: 0 auto; }
-			/* Reklam alanlarını ve gereksiz butonları gizle */
-			#openSideBar, .rrssb-buttons { display: none !important; }
+			/* Play butonunun ve oyunun düzgün görünmesi için şart */
+			#startBtn {
+				position: absolute;
+				left: 50%;
+				top: 50%;
+				transform: translate(-50%, -50%);
+				z-index: 99;
+				cursor: pointer;
+			}
+			/* Gereksiz reklam ve yan menü butonlarını gizle ama oyun butonlarına dokunma */
+			#openSideBar { display: none !important; }
 		</style>
 	</head>
 	<body>
 		<canvas id="canvas"></canvas>
 		<div id="overlay" class="faded overlay"></div>
-		<div id='startBtn'></div>
+		
+		<div id='startBtn'>
+			<img src="./images/btn_start.svg" alt="Başlat" style="width: 80px; height: 80px;">
+		</div>
+
 		<div id="helpScreen" class='unselectable'>
 			<div id='inst_main_body'></div>
 		</div>
-		
+
 		<img id="pauseBtn" src="./images/btn_pause.svg"/>
 		<img id='restartBtn' src="./images/btn_restart.svg"/>
 		
 		<div id='highScoreInGameText'>
-			<div id='highScoreInGameTextHeader'>EN YÜKSEK SKOR</div>
+			<div id='highScoreInGameTextHeader'>REKOR</div>
 			<div id='currentHighScore'>0</div>
 		</div>
 
@@ -60,13 +70,13 @@
 			<div id='container'>
 				<div id='gameOverBox' class='GOTitle'>OYUN BİTTİ</div>
 				<div id='cScore'>0</div>
-				<div id='highScoresTitle' class='GOTitle'>SKORLAR</div>
+				<div id='highScoresTitle' class='GOTitle'>EN İYİLER</div>
 				<div class='score'><span class='scoreNum'>1.</span> <div id="1place" style="display:inline;">0</div></div>
 				<div class='score'><span class='scoreNum'>2.</span> <div id="2place" style="display:inline;">0</div></div>
 				<div class='score'><span class='scoreNum'>3.</span> <div id="3place" style="display:inline;">0</div></div>
 			</div>
 			<div id='bottomContainer'>
-				<img id='restart' src='./images/btn_restart.svg' height='57px'>
+				<img id='restart' src='./images/btn_restart.svg' height='57px' style="cursor:pointer;">
 			</div>
 		</div>
 
