@@ -53,7 +53,7 @@
 
     .auth {
       width: 90%;
-      max-width: 360px;
+      max-width: 340px;
       background: white;
       padding: 30px;
       border-radius: 22px;
@@ -63,8 +63,9 @@
 
     .auth h2 {
       margin-top: 0;
-      margin-bottom: 20px;
+      margin-bottom: 25px;
       font-size: 22px;
+      color: #111;
     }
 
     .auth button {
@@ -76,11 +77,11 @@
       border: none;
       cursor: pointer;
       font-weight: 600;
-      transition: transform 0.1s;
+      transition: all 0.2s;
     }
 
     .auth button:active {
-      transform: scale(0.98);
+      transform: scale(0.97);
     }
 
     .btn-google {
@@ -88,15 +89,17 @@
       color: white;
     }
 
-    .btn-microsoft {
-      background: #2F2F2F;
-      color: white;
+    .btn-google:hover {
+      background: #357ae8;
     }
 
     .btn-guest {
+      background: #f2f2f7;
+      color: #1c1c1e;
+    }
+
+    .btn-guest:hover {
       background: #e5e5ea;
-      color: #000;
-      margin-top: 8px;
     }
 
     .grid {
@@ -123,17 +126,16 @@
 
 <div id="modalWrapper">
   <div class="auth" id="authBox">
-    <h2>Giriş Yap</h2>
-    <button class="btn-google" onclick="oauth('google')">Google ile giriş</button>
-    <button class="btn-microsoft" onclick="oauth('azure')">Microsoft ile giriş</button>
-    <button class="btn-guest" onclick="guest()">Misafir olarak devam et</button>
+    <h2>Hoş Geldiniz</h2>
+    <button class="btn-google" onclick="oauth('google')">Google ile Giriş Yap</button>
+    <button class="btn-guest" onclick="guest()">Misafir Olarak Devam Et</button>
   </div>
 </div>
 
 <div class="grid" id="games" style="display:none;">
   <div class="card"></div>
   <div class="card"></div>
-  <div class="card"></div>
+  <div class="card)</div>
 </div>
 
 <script>
@@ -153,7 +155,7 @@
         redirectTo: 'https://eymenderdiyok.com.tr'
       }
     })
-    if (error) console.error('Giriş hatası:', error.message)
+    if (error) alert("Giriş hatası: " + error.message)
   }
 
   function guest() {
