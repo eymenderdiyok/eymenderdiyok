@@ -2,111 +2,47 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>A Small World Cup - Oyna</title>
+  <title>A Small World Cup</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  
   <style>
-    :root {
-      --apple-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      --bg-color: #f5f5f7;
-    }
+    :root { --apple-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #f5f5f7; font-family: var(--apple-font); overflow: hidden; display: flex; flex-direction: column; }
 
-    body, html {
-      margin: 0; padding: 0; width: 100%; height: 100%;
-      background-color: var(--bg-color);
-      font-family: var(--apple-font);
-      overflow: hidden;
-      display: flex; flex-direction: column;
-    }
-
-    /* APPLE HEADER GERİ GELDİ */
+    /* APPLE HEADER */
     header {
-      display: flex;
-      align-items: center;
-      padding: 0 40px;
-      height: 60px;
-      background: rgba(255, 255, 255, 0.8);
-      backdrop-filter: saturate(180%) blur(20px);
-      z-index: 1000;
-      border-bottom: 1px solid rgba(0,0,0,0.08);
-      flex-shrink: 0;
+      display: flex; align-items: center; padding: 0 30px; height: 50px;
+      background: rgba(255, 255, 255, 0.8); backdrop-filter: saturate(180%) blur(20px);
+      z-index: 1000; border-bottom: 1px solid rgba(0,0,0,0.1); flex-shrink: 0;
     }
+    .back-btn { text-decoration: none; color: #0071e3; font-weight: 500; font-size: 15px; }
+    header h1 { flex: 1; text-align: center; font-size: 16px; font-weight: 600; margin: 0; color: #1d1d1f; margin-right: 60px; }
 
-    .back-btn {
-      text-decoration: none;
-      color: #0071e3;
-      font-weight: 500;
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-    }
-
-    .back-btn::before { content: "‹"; font-size: 26px; margin-right: 5px; }
-
-    header h1 {
-      flex: 1;
-      text-align: center;
-      font-size: 17px;
-      font-weight: 600;
-      margin: 0;
-      color: #1d1d1f;
-      padding-right: 80px; /* Butonu dengelemek için */
-    }
-
-    /* OYUN ALANI VE ROUNDED KÖŞELER */
-    .game-container {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px; /* Kenarlardan boşluk */
-      box-sizing: border-box;
-    }
-
+    /* ROUNDED GAME CONTAINER */
+    .game-container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 15px; box-sizing: border-box; }
     iframe {
-      width: 100%;
-      max-width: 1100px;
-      height: 100%;
-      border: none;
-      border-radius: 28px; /* İSTEDİĞİN ROUNDED KÖŞELER */
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      width: 100%; height: 100%; border: none;
+      border-radius: 30px; /* İSTEDİĞİN ROUNDED KÖŞELER */
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
       background: #000;
-    }
-
-    @media (max-width: 600px) {
-      header { padding: 0 20px; }
-      .game-container { padding: 10px; }
-      iframe { border-radius: 15px; }
     }
   </style>
 </head>
 <body>
 
 <header>
-  <a href="https://eymenderdiyok.com.tr" class="back-btn">Ana Menü</a>
+  <a href="https://eymenderdiyok.com.tr" class="back-btn">‹ Ana Menü</a>
   <h1>A Small World Cup</h1>
 </header>
 
 <div class="game-container">
-  <iframe id="game-iframe" src="data/index.html" 
-          allow="autoplay; fullscreen; gamepad; keyboard" 
-          allowfullscreen="true"></iframe>
+  <iframe id="game-frame" src="data/index.html" allow="autoplay; fullscreen; gamepad" allowfullscreen></iframe>
 </div>
 
 <script>
-  // Play butonunun algılanması için iframe'e otomatik odaklanma
-  window.addEventListener('load', function() {
-    const frame = document.getElementById('game-iframe');
-    
-    // Sayfaya tıklandığı an odağı iframe'e ver (Play butonunun çalışması için kritik)
-    document.addEventListener('click', function() {
-      frame.focus();
-    });
-
-    // Otomatik odaklanma denemesi
-    setTimeout(() => {
-      frame.focus();
-    }, 1000);
+  // Tıklama ile hem sesi hem oyunu aktif etme
+  window.addEventListener('mousedown', function() {
+    var frame = document.getElementById('game-frame');
+    frame.focus();
   });
 </script>
 
