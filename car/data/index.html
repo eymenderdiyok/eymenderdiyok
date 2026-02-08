@@ -2,27 +2,28 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Modern Car Driver 3D - Pro Edition</title>
+    <title>Modern Car Driver 3D | Real Edition</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #87ceeb; overflow: hidden; font-family: 'SF Pro Display', sans-serif; }
-        canvas { display: block; width: 100vw; height: 100vh; image-rendering: auto; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
+        canvas { display: block; width: 100%; height: 100%; }
         
-        /* MODERN UI */
-        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 100; color: white; transition: 0.5s; }
-        .hidden { display: none !important; opacity: 0; }
+        /* UI ELEMENTS */
+        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); z-index: 100; color: white; }
+        .hidden { display: none !important; }
         
-        .menu-card { background: rgba(255,255,255,0.1); padding: 40px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.2); text-align: center; width: 400px; }
-        .input-group { margin-bottom: 20px; }
-        input { background: rgba(255,255,255,0.1); border: 2px solid #0071e3; color: white; padding: 12px; border-radius: 10px; width: 80%; outline: none; font-size: 1rem; }
+        .menu-card { background: rgba(255,255,255,0.05); padding: 40px; border-radius: 40px; border: 1px solid rgba(255,255,255,0.1); text-align: center; width: 450px; box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
+        input { background: rgba(255,255,255,0.1); border: 2px solid #0071e3; color: white; padding: 15px; border-radius: 15px; width: 80%; outline: none; font-size: 1.2rem; margin-bottom: 25px; text-align: center; }
         
-        .mode-selector { display: flex; gap: 10px; justify-content: center; margin: 20px 0; }
-        .mode-btn { padding: 10px 20px; border: 1px solid #0071e3; border-radius: 20px; color: white; cursor: pointer; background: transparent; transition: 0.3s; }
-        .mode-btn.active { background: #0071e3; box-shadow: 0 0 15px #0071e3; }
+        .mode-selector { display: flex; gap: 15px; justify-content: center; margin-bottom: 30px; }
+        .mode-btn { padding: 12px 25px; border: 2px solid #333; border-radius: 15px; color: #888; cursor: pointer; background: transparent; transition: 0.3s; font-weight: bold; }
+        .mode-btn.active { border-color: #0071e3; color: white; background: #0071e3; box-shadow: 0 0 20px rgba(0,113,227,0.4); }
 
-        .start-btn { background: #32d74b; color: white; border: none; padding: 15px 40px; border-radius: 30px; font-size: 1.5rem; font-weight: 700; cursor: pointer; width: 100%; }
+        .start-btn { background: #32d74b; color: white; border: none; padding: 20px; border-radius: 20px; font-size: 1.6rem; font-weight: 800; cursor: pointer; width: 100%; transition: 0.2s; }
+        .start-btn:hover { transform: scale(1.02); background: #3cf259; }
         
-        #hud { position: absolute; top: 0; left: 0; width: 100%; padding: 20px; display: flex; justify-content: space-between; color: white; font-size: 1.5rem; pointer-events: none; text-shadow: 2px 2px 4px #000; }
-        .medal-icon { font-size: 5rem; margin: 20px; display: block; }
+        #hud { position: absolute; top: 0; left: 0; width: 100%; padding: 30px; display: flex; justify-content: space-between; color: white; font-size: 1.8rem; pointer-events: none; z-index: 50; font-weight: 900; }
+        .speed-box { position: absolute; bottom: 40px; right: 40px; text-align: right; }
+        .speed-val { font-size: 4rem; color: #0071e3; line-height: 1; }
     </style>
 </head>
 <body>
@@ -31,66 +32,66 @@
 
     <div id="menu" class="overlay">
         <div class="menu-card">
-            <h1>MODERN RACER</h1>
-            <div class="input-group">
-                <input type="text" id="playerName" placeholder="İsminizi Yazın" maxlength="12">
-            </div>
-            <p>ZORLUK</p>
+            <h1 style="font-size: 2.5rem; margin-bottom: 10px;">MODERN DRIVER</h1>
+            <p style="color: #888; margin-bottom: 30px;">Gerçekçi 3D Yarış Simülasyonu</p>
+            <input type="text" id="playerName" placeholder="Pilot İsmi" maxlength="10">
             <div class="mode-selector">
                 <button class="mode-btn" onclick="setMode(0.7, this)">KOLAY</button>
                 <button class="mode-btn active" onclick="setMode(1, this)">NORMAL</button>
                 <button class="mode-btn" onclick="setMode(1.4, this)">ZOR</button>
             </div>
-            <button class="start-btn" onclick="init()">YARIŞA BAŞLA</button>
+            <button class="start-btn" onclick="init()">BAŞLAT</button>
         </div>
     </div>
 
     <div id="results" class="overlay hidden">
         <div class="menu-card">
-            <span id="medal" class="medal-icon">🥇</span>
-            <h2 id="final-status">TEBRİKLER!</h2>
-            <p id="rank-text" style="font-size: 1.5rem;"></p>
-            <button class="start-btn" onclick="location.reload()">TEKRAR DENE</button>
+            <div id="medal-icon" style="font-size: 6rem; margin-bottom: 20px;">🥇</div>
+            <h2 id="rank-text" style="font-size: 3rem; margin: 0;">1. OLDUN!</h2>
+            <p id="time-text" style="color: #888; margin-bottom: 30px;">Harika bir sürüş!</p>
+            <button class="start-btn" onclick="location.reload()">TEKRAR YARIŞ</button>
         </div>
     </div>
 
     <div id="hud" class="hidden">
         <div id="pos-ui">SIRA: 1/8</div>
-        <div id="name-ui">EYMEN</div>
-        <div id="speed-ui">0 KM/H</div>
+        <div class="speed-box">
+            <div id="speed-ui" class="speed-val">0</div>
+            <div style="font-size: 1rem; color: #888;">KM/H</div>
+        </div>
     </div>
 
 <script>
+/**
+ * 3D ENGINE - REAL CARS & PHYSICS
+ */
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-let player, segments = [], cars = [], running = false;
-let difficultyMult = 1;
-let lastTime = 0;
+let player, segments = [], cars = [], running = false, difficulty = 1;
 let keys = {};
+let trackLength = 0;
 
 const CFG = {
     roadW: 2000, segL: 200, camH: 1000, camD: 0.84, drawD: 300,
-    maxS: 25000, accel: 8000, brake: -10000, decel: -5000
+    maxS: 26000, accel: 8500, brake: -12000, decel: -5000
 };
 
 window.onkeydown = e => keys[e.code] = true;
 window.onkeyup = e => keys[e.code] = false;
 
 function setMode(m, btn) {
-    difficultyMult = m;
+    difficulty = m;
     document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
 }
 
 function init() {
-    const name = document.getElementById('playerName').value || "SÜRÜCÜ";
-    document.getElementById('name-ui').innerText = name.toUpperCase();
+    const name = document.getElementById('playerName').value || "PİLOT";
     document.getElementById('menu').classList.add('hidden');
     document.getElementById('hud').classList.remove('hidden');
 
-    canvas.width = window.innerWidth * window.devicePixelRatio;
-    canvas.height = window.innerHeight * window.devicePixelRatio;
-    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
     player = { x: 0, z: 0, speed: 0, lap: 1 };
     segments = [];
@@ -101,21 +102,20 @@ function init() {
             index: i,
             p1: { world: { z: i*CFG.segL }, screen: {} },
             p2: { world: { z: (i+1)*CFG.segL }, screen: {} },
-            curve: i > 200 && i < 400 ? 3 : i > 600 && i < 800 ? -4 : 0,
-            color: Math.floor(i/3)%2 ? '#333' : '#383838',
-            tree: (i%6==0) ? (Math.random() > 0.5 ? 1.6 : -1.6) : 0
+            curve: i > 200 && i < 400 ? 3 : i > 700 && i < 900 ? -4 : i > 1100 ? 2 : 0,
+            color: Math.floor(i/3)%2 ? '#333' : '#383838'
         });
     }
+    trackLength = segments.length * CFG.segL;
 
-    // RAKİPLER
+    // RAKİP GERÇEKÇİ ARABALAR
     cars = [];
     for(let i=0; i<7; i++) {
         cars.push({
-            x: (i%2==0 ? 0.6 : -0.6),
-            z: (i+1) * 4000,
-            speed: (12000 + Math.random()*6000) * difficultyMult,
-            color: `hsl(${i*45}, 70%, 50%)`,
-            name: "BOT " + (i+1)
+            x: (Math.random() * 1.4 - 0.7),
+            z: (i + 1) * (trackLength / 8),
+            speed: (13000 + Math.random() * 5000) * difficulty,
+            color: `hsl(${Math.random() * 360}, 70%, 50%)`
         });
     }
 
@@ -126,60 +126,94 @@ function init() {
 function project(p, camX, camY, camZ) {
     p.camera = { x: (p.world.x||0) - camX, y: (p.world.y||0) - camY, z: p.world.z - camZ };
     p.screen.scale = CFG.camD / p.camera.z;
-    p.screen.x = (window.innerWidth/2) + (p.screen.scale * p.camera.x * window.innerWidth/2);
-    p.screen.y = (window.innerHeight/2) - (p.screen.scale * p.camera.y * window.innerHeight/2);
-    p.screen.w = (p.screen.scale * CFG.roadW * window.innerWidth/2);
+    p.screen.x = (canvas.width/2) + (p.screen.scale * p.camera.x * canvas.width/2);
+    p.screen.y = (canvas.height/2) - (p.screen.scale * p.camera.y * canvas.height/2);
+    p.screen.w = (p.screen.scale * CFG.roadW * canvas.width/2);
 }
 
 function loop(time) {
     if(!running) return;
-    let dt = (time - lastTime)/1000;
-    lastTime = time;
-    update(dt);
+    update(1/60);
     render();
     requestAnimationFrame(loop);
 }
 
 function update(dt) {
-    const trackL = segments.length * CFG.segL;
-    
-    // FİZİK
     if(keys['ArrowUp'] || keys['KeyW']) player.speed += CFG.accel * dt;
     else if(keys['ArrowDown'] || keys['KeyS']) player.speed += CFG.brake * dt;
     else player.speed += CFG.decel * dt;
 
-    // BARİYER VE KONTROL
-    if(keys['ArrowLeft'] || keys['KeyA']) player.x = Math.max(-0.8, player.x - 1.4 * dt);
-    if(keys['ArrowRight'] || keys['KeyD']) player.x = Math.min(0.8, player.x + 1.4 * dt);
+    if(keys['ArrowLeft'] || keys['KeyA']) player.x = Math.max(-0.85, player.x - 1.5 * dt * (player.speed/CFG.maxS + 0.3));
+    if(keys['ArrowRight'] || keys['KeyD']) player.x = Math.min(0.85, player.x + 1.5 * dt * (player.speed/CFG.maxS + 0.3));
 
     player.speed = Math.max(0, Math.min(player.speed, CFG.maxS));
     player.z += player.speed * dt;
 
-    if(player.z >= trackL) {
-        player.z -= trackL;
+    if(player.z >= trackLength) {
+        player.z -= trackLength;
         player.lap++;
         if(player.lap > 3) finish();
     }
 
     cars.forEach(c => {
         c.z += c.speed * dt;
-        if(c.z >= trackL) c.z -= trackL;
+        if(c.z >= trackLength) c.z -= trackLength;
     });
 
-    // SIRALAMA HESAPLA
     let rank = 1;
     cars.forEach(c => { if(c.z > player.z) rank++; });
     document.getElementById('pos-ui').innerText = `SIRA: ${rank}/8`;
-    document.getElementById('speed-ui').innerText = Math.round(player.speed/100) + " KM/H";
+    document.getElementById('speed-ui').innerText = Math.round(player.speed/100);
+}
+
+// GELİŞMİŞ ARABA ÇİZİM MOTORU (VEKTÖREL)
+function drawVehicle(ctx, x, y, width, color, isPlayer = false) {
+    let w = width;
+    let h = w * 0.5;
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    // Gölge
+    ctx.fillStyle = "rgba(0,0,0,0.3)";
+    ctx.beginPath(); ctx.ellipse(0, h/2, w*0.6, h*0.3, 0, 0, Math.PI*2); ctx.fill();
+
+    // Gövde (Alt Katman)
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.roundRect(-w/2, -h/2, w, h, w*0.1);
+    ctx.fill();
+
+    // Üst Kabin
+    ctx.fillStyle = "rgba(0,0,0,0.7)";
+    ctx.beginPath();
+    ctx.roundRect(-w/3, -h/1.2, w/1.5, h/1.5, w*0.1);
+    ctx.fill();
+
+    // Cam Detayı
+    ctx.fillStyle = "rgba(255,255,255,0.2)";
+    ctx.beginPath();
+    ctx.moveTo(-w/4, -h/1.3); ctx.lineTo(w/4, -h/1.3); ctx.lineTo(w/3.5, -h/2); ctx.lineTo(-w/3.5, -h/2);
+    ctx.fill();
+
+    // Arka Rüzgarlık (Spoiler)
+    ctx.fillStyle = "#111";
+    ctx.fillRect(-w/2, -h/1.4, w, h/8);
+
+    // Stop Lambaları
+    ctx.fillStyle = isPlayer && keys['ArrowDown'] ? "#ff0000" : "#880000";
+    ctx.fillRect(-w/2.2, -h/3, w/6, h/5);
+    ctx.fillRect(w/3.5, -h/3, w/6, h/5);
+
+    ctx.restore();
 }
 
 function render() {
     ctx.clearRect(0,0, canvas.width, canvas.height);
     
-    // GÖKYÜZÜ
-    let grad = ctx.createLinearGradient(0,0,0, window.innerHeight);
-    grad.addColorStop(0, '#1a73e8'); grad.addColorStop(0.5, '#87ceeb');
-    ctx.fillStyle = grad; ctx.fillRect(0,0, window.innerWidth, window.innerHeight);
+    // Gökyüzü ve Çimen
+    ctx.fillStyle = "#72d7ee"; ctx.fillRect(0,0, canvas.width, canvas.height/2);
+    ctx.fillStyle = "#39a032"; ctx.fillRect(0, canvas.height/2, canvas.width, canvas.height/2);
 
     let base = Math.floor(player.z / CFG.segL);
     let x=0, dx=0;
@@ -188,14 +222,13 @@ function render() {
         let s = segments[(base + n)%segments.length];
         let loop = s.index < base;
 
-        project(s.p1, player.x*CFG.roadW - x, CFG.camH, player.z - (loop?segments.length*CFG.segL:0));
-        project(s.p2, player.x*CFG.roadW - x - dx, CFG.camH, player.z - (loop?segments.length*CFG.segL:0));
+        project(s.p1, player.x*CFG.roadW - x, CFG.camH, player.z - (loop?trackLength:0));
+        project(s.p2, player.x*CFG.roadW - x - dx, CFG.camH, player.z - (loop?trackLength:0));
         
         x += dx; dx += s.curve;
-
         if(s.p1.camera.z <= 0) continue;
 
-        // YOL
+        // Yol
         ctx.fillStyle = s.color;
         ctx.beginPath();
         ctx.moveTo(s.p1.screen.x - s.p1.screen.w, s.p1.screen.y);
@@ -204,61 +237,41 @@ function render() {
         ctx.lineTo(s.p2.screen.x - s.p2.screen.w, s.p2.screen.y);
         ctx.fill();
 
-        // BİTİŞ ÇİZGİSİ
-        if(s.index < 10) {
-            ctx.fillStyle = "white";
-            if(s.index % 2 == 0) ctx.fillRect(s.p1.screen.x - s.p1.screen.w, s.p1.screen.y, s.p1.screen.w*2, 20);
-        }
+        // Yan Şeritler
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(s.p1.screen.x - s.p1.screen.w - 10, s.p1.screen.y, 20, 2);
+        ctx.fillRect(s.p1.screen.x + s.p1.screen.w - 10, s.p1.screen.y, 20, 2);
 
-        // AĞAÇLAR (Daha yumuşak yükleme için opaklık eklendi)
-        if(s.tree) {
-            let tx = s.p1.screen.x + (s.tree * s.p1.screen.w);
-            ctx.globalAlpha = Math.min(1, n/20); // Mesafe bazlı görünürlük
-            ctx.fillStyle = "#4caf50"; ctx.beginPath(); ctx.arc(tx, s.p1.screen.y-40, 30*s.p1.screen.scale*200, 0, Math.PI*2); ctx.fill();
-            ctx.globalAlpha = 1;
+        // Bitiş Çizgisi
+        if(s.index < 15) {
+            ctx.fillStyle = s.index % 2 ? "#eee" : "#333";
+            ctx.fillRect(s.p1.screen.x - s.p1.screen.w, s.p1.screen.y, s.p1.screen.w*2, 20);
         }
     }
 
-    // RAKİP ARABALAR
+    // Rakip Araçları Çiz
     cars.forEach(c => {
-        if(c.z > player.z && c.z < player.z + 20000) {
-            let relZ = c.z - player.z;
+        let relZ = c.z - player.z;
+        if(relZ < 0) relZ += trackLength;
+        if(relZ < 30000) {
             let scale = CFG.camD / relZ;
-            let cx = (window.innerWidth/2) + (scale * (c.x - player.x) * CFG.roadW * window.innerWidth/2);
-            let cy = (window.innerHeight/2) - (scale * -CFG.camH * window.innerHeight/2);
-            let w = scale * 1200 * window.innerWidth/2;
-            ctx.fillStyle = c.color; ctx.fillRect(cx-w/2, cy-w/3, w, w/2); // Basit Araba Formu
+            let cx = (canvas.width/2) + (scale * (c.x - player.x) * CFG.roadW * canvas.width/2);
+            let cy = (canvas.height/2) - (scale * -CFG.camH * canvas.height/2);
+            drawVehicle(ctx, cx, cy, scale * 300000, c.color);
         }
     });
 
-    // OYUNCU ARABASI (MODERN)
-    drawPlayerCar();
-}
-
-function drawPlayerCar() {
-    let cp = { x: window.innerWidth/2, y: window.innerHeight - 100 };
-    ctx.fillStyle = "#0071e3";
-    // Gövde
-    ctx.beginPath(); ctx.roundRect(cp.x - 70, cp.y, 140, 50, 10); ctx.fill();
-    // Cam
-    ctx.fillStyle = "rgba(255,255,255,0.3)";
-    ctx.beginPath(); ctx.moveTo(cp.x - 50, cp.y); ctx.lineTo(cp.x - 30, cp.y-25); ctx.lineTo(cp.x + 30, cp.y-25); ctx.lineTo(cp.x + 50, cp.y); ctx.fill();
-    // Stop Lambaları
-    ctx.fillStyle = "red"; ctx.fillRect(cp.x - 65, cp.y + 10, 20, 10); ctx.fillRect(cp.x + 45, cp.y + 10, 20, 10);
+    // Oyuncu Aracı (Sabit konum, dinamik çizim)
+    drawVehicle(ctx, canvas.width/2, canvas.height - 150, 250, "#0071e3", true);
 }
 
 function finish() {
     running = false;
     let rank = 1;
     cars.forEach(c => { if(c.z > player.z) rank++; });
-    
     document.getElementById('results').classList.remove('hidden');
     document.getElementById('rank-text').innerText = rank + ". OLDUN!";
-    
-    let medal = "🥉";
-    if(rank == 1) medal = "🥇";
-    else if(rank <= 3) medal = "🥈";
-    document.getElementById('medal').innerText = medal;
+    document.getElementById('medal-icon').innerText = rank == 1 ? "🥇" : rank <= 3 ? "🥈" : "🥉";
 }
 </script>
 </body>
