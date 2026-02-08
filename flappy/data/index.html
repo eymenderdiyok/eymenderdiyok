@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>Flappy Bird</title>
+  <title>Flappy Bird - HTML5</title>
   <style>
     :root {
       --bg-1: #0b132b;
@@ -30,11 +30,9 @@
       overflow: hidden;
     }
 
-    /* Wrap ve Shell yapılarını tüm ekranı kaplayacak şekilde güncelledim */
     .wrap {
       height: 100%;
       width: 100%;
-      display: block;
     }
 
     .game-shell {
@@ -82,7 +80,6 @@
       display: grid;
       place-items: center;
       text-align: center;
-      font-size: clamp(16px, 2.2vw, 24px);
       padding: 24px;
       pointer-events: none;
     }
@@ -94,6 +91,7 @@
       border-radius: 16px;
       box-shadow: 0 12px 30px rgba(0,0,0,0.45);
       max-width: 420px;
+      pointer-events: auto; /* Butonların tıklanması için şart */
     }
 
     .panel-title {
@@ -113,11 +111,9 @@
       display: flex;
       gap: 10px;
       justify-content: center;
-      flex-wrap: wrap;
     }
 
     button {
-      pointer-events: auto;
       border: none;
       background: linear-gradient(135deg, #fbc531, #e1b12c);
       color: #1b1b1b;
@@ -127,13 +123,10 @@
       cursor: pointer;
       font-size: 14px;
       box-shadow: 0 10px 18px rgba(251,197,49,0.35);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transition: transform 0.2s ease;
     }
 
-    button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 16px 26px rgba(251,197,49,0.45);
-    }
+    button:hover { transform: translateY(-2px); }
 
     .footer {
       position: absolute;
@@ -142,10 +135,8 @@
       right: 0;
       display: flex;
       justify-content: center;
-      font-family: "Trebuchet MS", sans-serif;
       font-size: 12px;
       opacity: 0.7;
-      letter-spacing: 0.6px;
     }
 
     .flash {
@@ -153,26 +144,22 @@
       inset: 0;
       background: rgba(255,255,255,0.08);
       opacity: 0;
-      transition: opacity 0.2s ease;
       pointer-events: none;
     }
 
-    .flash.on {
-      opacity: 1;
-    }
+    .flash.on { opacity: 1; transition: opacity 0.2s; }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="game-shell">
-      <canvas id="game" aria-label="Flappy Bird"></canvas>
+      <canvas id="game"></canvas>
       <div class="hud">
         <div class="score" id="score">0</div>
         <div class="best" id="best">En iyi: 0</div>
         <div class="center-panel" id="overlay">
           <div class="panel-card">
             <div class="panel-title">FLAPPY BIRD</div>
-            <div class="panel-sub">Boşluk / Tıkla / Dokun</div>
             <div class="panel-sub">Engellerin arasından uç ve rekor kır.</div>
             <div class="btn-row">
               <button id="startBtn">Başla</button>
@@ -204,7 +191,6 @@
       width: window.innerWidth,
       height: window.innerHeight,
       running: false,
-      started: false,
       gameOver: false,
       score: 0,
       best: Number(localStorage.getItem("flappy-best") || 0),
@@ -220,25 +206,19 @@
     const pipes = [];
     const pipeCfg = { gap: 170, width: 70, spacing: 260, minTop: 80 };
 
-    // Arka plan elemanları
-    let clouds = [];
-    let stars = [];
+    let clouds = Array.from({ length: 10 }, (_, i) => ({
+      x: Math.random() * window.innerWidth,
+      y: 60 + (i % 5) * 60,
+      speed: 10 + i * 2,
+      size: 26 + i * 3,
+    }));
 
-    function initEnvironment() {
-      clouds = Array.from({ length: 10 }, (_, i) => ({
-        x: Math.random() * state.width * 2,
-        y: 60 + (i % 5) * 60,
-        speed: 10 + i * 2,
-        size: 26 + i * 3,
-      }));
-
-      stars = Array.from({ length: 80 }, () => ({
-        x: Math.random() * state.width,
-        y: Math.random() * state.height * 0.7,
-        r: Math.random() * 1.7 + 0.3,
-        tw: Math.random() * 1.5 + 0.5,
-      }));
-    }
+    let stars = Array.from({ length: 80 }, () => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight * 0.7,
+      r: Math.random() * 1.7 + 0.3,
+      tw: Math.random() * 1.5 + 0.5,
+    }));
 
     function resize() {
       state.width = window.innerWidth;
@@ -246,7 +226,6 @@
       canvas.width = state.width * DPR;
       canvas.height = state.height * DPR;
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-      initEnvironment();
       reset();
     }
 
@@ -257,8 +236,6 @@
       bird.rot = 0;
       pipes.length = 0;
       state.score = 0;
-      state.gameOver = false;
-      state.started = false;
       state.speed = 220;
       pushPipe(state.width + 200);
       pushPipe(state.width + 200 + pipeCfg.spacing);
@@ -266,46 +243,41 @@
     }
 
     function pushPipe(x) {
-      const availableHeight = state.height - pipeCfg.gap - pipeCfg.minTop * 2 - 80;
-      const top = pipeCfg.minTop + Math.random() * Math.max(0, availableHeight);
+      const top = pipeCfg.minTop + Math.random() * (state.height - pipeCfg.gap - pipeCfg.minTop * 2 - 100);
       pipes.push({ x, top, passed: false });
     }
 
     function updateScore() {
-      scoreEl.textContent = String(state.score);
+      scoreEl.textContent = state.score;
       bestEl.textContent = `En iyi: ${state.best}`;
     }
 
     function startGame() {
-      if (state.running) return;
-      state.running = true;
       overlay.style.display = "none";
-      state.started = true;
+      state.gameOver = false;
+      state.running = true;
       state.lastTime = performance.now();
+      reset();
       requestAnimationFrame(loop);
     }
 
     function endGame() {
       state.gameOver = true;
       state.running = false;
-      state.started = false;
       flash.classList.add("on");
       setTimeout(() => flash.classList.remove("on"), 180);
       overlay.style.display = "grid";
       overlay.querySelector(".panel-title").textContent = "OYUN BİTTİ";
-      overlay.querySelector(".panel-sub").textContent = `Skor: ${state.score}`;
       state.best = Math.max(state.best, state.score);
-      localStorage.setItem("flappy-best", String(state.best));
+      localStorage.setItem("flappy-best", state.best);
       updateScore();
     }
 
     function jump() {
-      if (!state.running) {
-        if (!state.gameOver && overlay.style.display === "none") startGame();
-        return;
+      if (state.running) {
+        bird.vy = state.lift;
+        playBeep(440, 0.08, 0.07);
       }
-      bird.vy = state.lift;
-      playBeep(440, 0.08, 0.07);
     }
 
     function update(dt) {
@@ -318,7 +290,7 @@
 
       for (const pipe of pipes) {
         pipe.x -= state.speed * dt;
-        if (!pipe.passed && pipe.x + pipeCfg.width < bird.x - bird.r) {
+        if (!pipe.passed && pipe.x + pipeCfg.width < bird.x) {
           pipe.passed = true;
           state.score += 1;
           updateScore();
@@ -326,126 +298,71 @@
         }
       }
 
-      if (pipes.length && pipes[0].x + pipeCfg.width < -20) {
+      if (pipes[0].x + pipeCfg.width < -50) {
         pipes.shift();
-        const last = pipes[pipes.length - 1];
-        pushPipe(last.x + pipeCfg.spacing);
+        pushPipe(pipes[pipes.length - 1].x + pipeCfg.spacing);
       }
 
-      if (bird.y - bird.r < 0 || bird.y + bird.r > state.height) {
-        endGame();
-      }
+      if (bird.y < 0 || bird.y > state.height) endGame();
 
       for (const pipe of pipes) {
-        if (collides(pipe)) {
-          endGame();
-          state.shake = 10;
-          break;
+        const bx = bird.x, by = bird.y, r = bird.r;
+        if (bx + r > pipe.x && bx - r < pipe.x + pipeCfg.width) {
+          if (by - r < pipe.top || by + r > pipe.top + pipeCfg.gap) {
+            endGame();
+            state.shake = 10;
+          }
         }
       }
 
-      for (const cloud of clouds) {
-        cloud.x -= cloud.speed * dt;
-        if (cloud.x + cloud.size * 3 < 0) {
-          cloud.x = state.width + 50;
-          cloud.y = 40 + Math.random() * 200;
-        }
-      }
-
-      for (const star of stars) {
-        star.tw += dt * 3;
-      }
-    }
-
-    function collides(pipe) {
-      const bx = bird.x, by = bird.y, r = bird.r;
-      const px = pipe.x, top = pipe.top, gap = pipeCfg.gap;
-      if (bx + r < px || bx - r > px + pipeCfg.width) return false;
-      if (by - r > top && by + r < top + gap) return false;
-      return true;
-    }
-
-    function drawBackground() {
-      const grd = ctx.createLinearGradient(0, 0, 0, state.height);
-      grd.addColorStop(0, "#1b2845");
-      grd.addColorStop(0.55, "#0b132b");
-      grd.addColorStop(1, "#090a12");
-      ctx.fillStyle = grd;
-      ctx.fillRect(0, 0, state.width, state.height);
-
-      for (const star of stars) {
-        ctx.fillStyle = "rgba(255,255,255,0.9)";
-        ctx.globalAlpha = 0.5 + 0.5 * Math.sin(star.tw);
-        ctx.beginPath();
-        ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.globalAlpha = 1;
-
-      ctx.fillStyle = "rgba(91,192,190,0.15)";
-      ctx.beginPath();
-      ctx.ellipse(state.width * 0.2, state.height * 0.75, 120, 60, 0, 0, Math.PI * 2);
-      ctx.ellipse(state.width * 0.7, state.height * 0.8, 180, 70, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = "rgba(255,255,255,0.12)";
-      for (const cloud of clouds) {
-        ctx.beginPath();
-        ctx.ellipse(cloud.x, cloud.y, cloud.size * 1.2, cloud.size * 0.7, 0, 0, Math.PI * 2);
-        ctx.ellipse(cloud.x + cloud.size, cloud.y + 8, cloud.size, cloud.size * 0.6, 0, 0, Math.PI * 2);
-        ctx.ellipse(cloud.x + cloud.size * 2, cloud.y + 2, cloud.size * 0.9, cloud.size * 0.55, 0, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-
-    function drawPipes() {
-      for (const pipe of pipes) {
-        ctx.fillStyle = "#2ecc71";
-        ctx.fillRect(pipe.x, 0, pipeCfg.width, pipe.top);
-        ctx.fillRect(pipe.x, pipe.top + pipeCfg.gap, pipeCfg.width, state.height - pipe.top - pipeCfg.gap);
-        ctx.fillStyle = "#27ae60";
-        ctx.fillRect(pipe.x - 6, pipe.top - 18, pipeCfg.width + 12, 18);
-        ctx.fillRect(pipe.x - 6, pipe.top + pipeCfg.gap, pipeCfg.width + 12, 18);
-        ctx.fillStyle = "rgba(0,0,0,0.2)";
-        ctx.fillRect(pipe.x + pipeCfg.width - 12, 0, 6, pipe.top);
-        ctx.fillRect(pipe.x + pipeCfg.width - 12, pipe.top + pipeCfg.gap, 6, state.height - pipe.top - pipeCfg.gap);
-      }
-    }
-
-    function drawBird() {
-      ctx.save();
-      ctx.translate(bird.x, bird.y);
-      ctx.rotate(bird.rot);
-      ctx.fillStyle = "#fbc531";
-      ctx.beginPath(); ctx.arc(0, 0, bird.r, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = "#f1c40f";
-      ctx.beginPath(); ctx.arc(-4, 2, bird.r * 0.6, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = "#1b1b1b";
-      ctx.beginPath(); ctx.arc(6, -3, 3.5, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = "#e17055";
-      ctx.beginPath(); ctx.moveTo(12, 2); ctx.lineTo(24, 6); ctx.lineTo(12, 10); ctx.closePath(); ctx.fill();
-      ctx.restore();
-    }
-
-    function drawGround() {
-      const h = 70;
-      const y = state.height - h;
-      ctx.fillStyle = "#0f2027";
-      ctx.fillRect(0, y, state.width, h);
-      ctx.fillStyle = "#2d3436";
-      for (let i = 0; i < state.width; i += 40) { ctx.fillRect(i, y + 10, 24, 6); }
+      clouds.forEach(c => {
+        c.x -= c.speed * dt;
+        if (c.x + 100 < 0) c.x = state.width + 100;
+      });
+      stars.forEach(s => s.tw += dt * 3);
     }
 
     function render() {
       ctx.save();
       if (state.shake > 0) {
-        ctx.translate((Math.random() - 0.5) * state.shake, (Math.random() - 0.5) * state.shake);
-        state.shake -= 1;
+        ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake);
+        state.shake--;
       }
-      drawBackground();
-      drawPipes();
-      drawBird();
-      drawGround();
+      
+      // Background
+      const grd = ctx.createLinearGradient(0, 0, 0, state.height);
+      grd.addColorStop(0, "#1b2845"); grd.addColorStop(1, "#090a12");
+      ctx.fillStyle = grd; ctx.fillRect(0,0,state.width,state.height);
+
+      // Stars & Clouds
+      ctx.fillStyle = "white";
+      stars.forEach(s => {
+        ctx.globalAlpha = 0.5 + 0.5 * Math.sin(s.tw);
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2); ctx.fill();
+      });
+      ctx.globalAlpha = 0.12;
+      clouds.forEach(c => {
+        ctx.beginPath(); ctx.ellipse(c.x, c.y, c.size*2, c.size, 0, 0, Math.PI*2); ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+
+      // Pipes
+      pipes.forEach(p => {
+        ctx.fillStyle = "#2ecc71";
+        ctx.fillRect(p.x, 0, pipeCfg.width, p.top);
+        ctx.fillRect(p.x, p.top + pipeCfg.gap, pipeCfg.width, state.height);
+      });
+
+      // Bird
+      ctx.save();
+      ctx.translate(bird.x, bird.y); ctx.rotate(bird.rot);
+      ctx.fillStyle = "#fbc531"; ctx.beginPath(); ctx.arc(0,0,bird.r,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle = "black"; ctx.beginPath(); ctx.arc(6,-3,3,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle = "#e17055"; ctx.beginPath(); ctx.moveTo(10,0); ctx.lineTo(20,5); ctx.lineTo(10,10); ctx.fill();
+      ctx.restore();
+
+      // Ground
+      ctx.fillStyle = "#0f2027"; ctx.fillRect(0, state.height-50, state.width, 50);
       ctx.restore();
     }
 
@@ -457,49 +374,29 @@
       if (state.running) requestAnimationFrame(loop);
     }
 
-    function toggleMute() {
-      state.muted = !state.muted;
-      muteBtn.textContent = `Ses: ${state.muted ? "Kapalı" : "Açık"}`;
-    }
-
-    function restart() {
-      overlay.querySelector(".panel-title").textContent = "FLAPPY BIRD";
-      overlay.querySelector(".panel-sub").textContent = "Boşluk / Tıkla / Dokun";
-      overlay.style.display = "grid";
-      state.gameOver = false;
-      state.running = false;
-      reset();
-      render();
-    }
-
     let audioCtx;
-    function playBeep(freq, duration, volume) {
+    function playBeep(f, d, v) {
       if (state.muted) return;
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = "square";
-      osc.frequency.value = freq;
-      gain.gain.value = volume;
-      osc.connect(gain); gain.connect(audioCtx.destination);
-      osc.start(); osc.stop(audioCtx.currentTime + duration);
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.frequency.value = f; g.gain.value = v;
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start(); o.stop(audioCtx.currentTime + d);
     }
 
-    function handleInput(e) {
-      if (e.type === "keydown") {
-        if (e.code === "Space") { e.preventDefault(); jump(); }
-        if (e.code === "KeyR") { e.preventDefault(); restart(); }
-        if (e.code === "KeyM") { e.preventDefault(); toggleMute(); }
-      } else {
-        if (e.target.tagName !== 'BUTTON') jump();
-      }
-    }
-
-    window.addEventListener("resize", resize);
-    window.addEventListener("keydown", handleInput);
-    window.addEventListener("pointerdown", handleInput);
     startBtn.addEventListener("click", (e) => { e.stopPropagation(); startGame(); });
-    muteBtn.addEventListener("click", (e) => { e.stopPropagation(); toggleMute(); });
+    muteBtn.addEventListener("click", (e) => { 
+      e.stopPropagation(); 
+      state.muted = !state.muted;
+      muteBtn.textContent = `Ses: ${state.muted ? "Kapalı" : "Açık"}`;
+    });
+    window.addEventListener("keydown", (e) => {
+      if (e.code === "Space") { e.preventDefault(); jump(); }
+      if (e.code === "KeyR") startGame();
+    });
+    window.addEventListener("pointerdown", (e) => { if(state.running) jump(); });
+    window.addEventListener("resize", resize);
 
     resize();
     render();
