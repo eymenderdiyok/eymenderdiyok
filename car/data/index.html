@@ -2,83 +2,120 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>MODERN CAR RACER | 3D EDITION</title>
+    <title>Modern Car Driver 3D - Pro Edition</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #72d7ee; overflow: hidden; font-family: sans-serif; }
-        canvas { display: block; width: 100%; height: 100%; }
-        #ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; color: white; text-shadow: 2px 2px #000; }
-        .menu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: all; }
-        .btn { background: #ff4757; border: none; color: white; padding: 20px 40px; font-size: 1.5rem; cursor: pointer; border-radius: 10px; }
-        #hud { padding: 20px; font-size: 1.5rem; display: flex; justify-content: space-between; }
-        .speed { position: absolute; bottom: 30px; right: 30px; font-size: 3rem; }
-        .hidden { display: none; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #87ceeb; overflow: hidden; font-family: 'SF Pro Display', sans-serif; }
+        canvas { display: block; width: 100vw; height: 100vh; image-rendering: auto; }
+        
+        /* MODERN UI */
+        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 100; color: white; transition: 0.5s; }
+        .hidden { display: none !important; opacity: 0; }
+        
+        .menu-card { background: rgba(255,255,255,0.1); padding: 40px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.2); text-align: center; width: 400px; }
+        .input-group { margin-bottom: 20px; }
+        input { background: rgba(255,255,255,0.1); border: 2px solid #0071e3; color: white; padding: 12px; border-radius: 10px; width: 80%; outline: none; font-size: 1rem; }
+        
+        .mode-selector { display: flex; gap: 10px; justify-content: center; margin: 20px 0; }
+        .mode-btn { padding: 10px 20px; border: 1px solid #0071e3; border-radius: 20px; color: white; cursor: pointer; background: transparent; transition: 0.3s; }
+        .mode-btn.active { background: #0071e3; box-shadow: 0 0 15px #0071e3; }
+
+        .start-btn { background: #32d74b; color: white; border: none; padding: 15px 40px; border-radius: 30px; font-size: 1.5rem; font-weight: 700; cursor: pointer; width: 100%; }
+        
+        #hud { position: absolute; top: 0; left: 0; width: 100%; padding: 20px; display: flex; justify-content: space-between; color: white; font-size: 1.5rem; pointer-events: none; text-shadow: 2px 2px 4px #000; }
+        .medal-icon { font-size: 5rem; margin: 20px; display: block; }
     </style>
 </head>
 <body>
 
     <canvas id="gameCanvas"></canvas>
-    
-    <div id="ui">
-        <div id="menu" class="menu">
-            <h1 style="font-size: 4rem;">MODERN RACER</h1>
-            <button class="btn" onclick="startGame()">YARIŞA BAŞLA</button>
+
+    <div id="menu" class="overlay">
+        <div class="menu-card">
+            <h1>MODERN RACER</h1>
+            <div class="input-group">
+                <input type="text" id="playerName" placeholder="İsminizi Yazın" maxlength="12">
+            </div>
+            <p>ZORLUK</p>
+            <div class="mode-selector">
+                <button class="mode-btn" onclick="setMode(0.7, this)">KOLAY</button>
+                <button class="mode-btn active" onclick="setMode(1, this)">NORMAL</button>
+                <button class="mode-btn" onclick="setMode(1.4, this)">ZOR</button>
+            </div>
+            <button class="start-btn" onclick="init()">YARIŞA BAŞLA</button>
         </div>
-        <div id="hud" class="hidden">
-            <div id="pos">SIRALAMA: 1 / 6</div>
-            <div id="lap">TUR: 1 / 3</div>
+    </div>
+
+    <div id="results" class="overlay hidden">
+        <div class="menu-card">
+            <span id="medal" class="medal-icon">🥇</span>
+            <h2 id="final-status">TEBRİKLER!</h2>
+            <p id="rank-text" style="font-size: 1.5rem;"></p>
+            <button class="start-btn" onclick="location.reload()">TEKRAR DENE</button>
         </div>
-        <div id="speed" class="speed hidden">0 KM/H</div>
+    </div>
+
+    <div id="hud" class="hidden">
+        <div id="pos-ui">SIRA: 1/8</div>
+        <div id="name-ui">EYMEN</div>
+        <div id="speed-ui">0 KM/H</div>
     </div>
 
 <script>
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+let player, segments = [], cars = [], running = false;
+let difficultyMult = 1;
+let lastTime = 0;
+let keys = {};
 
 const CFG = {
-    fps: 60, roadW: 2000, segL: 200, camH: 1000, camD: 0.84,
-    drawD: 200, maxS: 22000, accel: 7500, brake: -10000, decel: -4000
+    roadW: 2000, segL: 200, camH: 1000, camD: 0.84, drawD: 300,
+    maxS: 25000, accel: 8000, brake: -10000, decel: -5000
 };
-
-let player, segments = [], cars = [], running = false, lastTime = 0;
-let keys = {};
 
 window.onkeydown = e => keys[e.code] = true;
 window.onkeyup = e => keys[e.code] = false;
 
-function startGame() {
-    document.getElementById('menu').classList.add('hidden');
-    document.getElementById('hud').classList.remove('hidden');
-    document.getElementById('speed').classList.remove('hidden');
-    init();
+function setMode(m, btn) {
+    difficultyMult = m;
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
 }
 
 function init() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    
+    const name = document.getElementById('playerName').value || "SÜRÜCÜ";
+    document.getElementById('name-ui').innerText = name.toUpperCase();
+    document.getElementById('menu').classList.add('hidden');
+    document.getElementById('hud').classList.remove('hidden');
+
+    canvas.width = window.innerWidth * window.devicePixelRatio;
+    canvas.height = window.innerHeight * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
     player = { x: 0, z: 0, speed: 0, lap: 1 };
     segments = [];
 
-    // Yol Oluşturma
-    for (let i = 0; i < 1000; i++) {
+    // PİST OLUŞTURMA
+    for(let i=0; i<1500; i++) {
         segments.push({
             index: i,
-            p1: { world: { z: i * CFG.segL }, screen: {} },
-            p2: { world: { z: (i + 1) * CFG.segL }, screen: {} },
-            curve: (i > 100 && i < 200) ? 2 : (i > 400 && i < 600) ? -3 : 0,
-            color: Math.floor(i / 3) % 2 ? '#444' : '#4a4a4a',
-            tree: (i % 5 === 0) ? (Math.random() > 0.5 ? 1.5 : -1.5) : 0 // Yol kenarı ağaçları
+            p1: { world: { z: i*CFG.segL }, screen: {} },
+            p2: { world: { z: (i+1)*CFG.segL }, screen: {} },
+            curve: i > 200 && i < 400 ? 3 : i > 600 && i < 800 ? -4 : 0,
+            color: Math.floor(i/3)%2 ? '#333' : '#383838',
+            tree: (i%6==0) ? (Math.random() > 0.5 ? 1.6 : -1.6) : 0
         });
     }
 
-    // Rakip Araçlar
+    // RAKİPLER
     cars = [];
-    for (let i = 0; i < 5; i++) {
+    for(let i=0; i<7; i++) {
         cars.push({
-            x: (i % 2 === 0 ? 0.5 : -0.5),
-            z: (i + 1) * 3000,
-            speed: 10000 + Math.random() * 5000,
-            color: `hsl(${i * 60}, 70%, 50%)`
+            x: (i%2==0 ? 0.6 : -0.6),
+            z: (i+1) * 4000,
+            speed: (12000 + Math.random()*6000) * difficultyMult,
+            color: `hsl(${i*45}, 70%, 50%)`,
+            name: "BOT " + (i+1)
         });
     }
 
@@ -87,19 +124,17 @@ function init() {
 }
 
 function project(p, camX, camY, camZ) {
-    p.camera = { x: (p.world.x || 0) - camX, y: (p.world.y || 0) - camY, z: p.world.z - camZ };
+    p.camera = { x: (p.world.x||0) - camX, y: (p.world.y||0) - camY, z: p.world.z - camZ };
     p.screen.scale = CFG.camD / p.camera.z;
-    p.screen.x = (canvas.width / 2) + (p.screen.scale * p.camera.x * canvas.width / 2);
-    p.screen.y = (canvas.height / 2) - (p.screen.scale * p.camera.y * canvas.height / 2);
-    p.screen.w = (p.screen.scale * CFG.roadW * canvas.width / 2);
+    p.screen.x = (window.innerWidth/2) + (p.screen.scale * p.camera.x * window.innerWidth/2);
+    p.screen.y = (window.innerHeight/2) - (p.screen.scale * p.camera.y * window.innerHeight/2);
+    p.screen.w = (p.screen.scale * CFG.roadW * window.innerWidth/2);
 }
 
 function loop(time) {
-    if (!running) return;
-    let dt = (time - lastTime) / 1000;
-    if (dt > 0.1) dt = 0.1;
+    if(!running) return;
+    let dt = (time - lastTime)/1000;
     lastTime = time;
-
     update(dt);
     render();
     requestAnimationFrame(loop);
@@ -107,96 +142,124 @@ function loop(time) {
 
 function update(dt) {
     const trackL = segments.length * CFG.segL;
-
-    // Hızlanma / Fren
-    if (keys['ArrowUp'] || keys['KeyW']) player.speed += CFG.accel * dt;
-    else if (keys['ArrowDown'] || keys['KeyS']) player.speed += CFG.brake * dt;
+    
+    // FİZİK
+    if(keys['ArrowUp'] || keys['KeyW']) player.speed += CFG.accel * dt;
+    else if(keys['ArrowDown'] || keys['KeyS']) player.speed += CFG.brake * dt;
     else player.speed += CFG.decel * dt;
 
-    // Görünmez Bariyer ( player.x limitli: -0.85 ile 0.85 arası )
-    if (keys['ArrowLeft'] || keys['KeyA']) player.x = Math.max(-0.85, player.x - 1.5 * dt);
-    if (keys['ArrowRight'] || keys['KeyD']) player.x = Math.min(0.85, player.x + 1.5 * dt);
+    // BARİYER VE KONTROL
+    if(keys['ArrowLeft'] || keys['KeyA']) player.x = Math.max(-0.8, player.x - 1.4 * dt);
+    if(keys['ArrowRight'] || keys['KeyD']) player.x = Math.min(0.8, player.x + 1.4 * dt);
 
     player.speed = Math.max(0, Math.min(player.speed, CFG.maxS));
     player.z += player.speed * dt;
 
-    if (player.z >= trackL) { player.z -= trackL; player.lap++; }
+    if(player.z >= trackL) {
+        player.z -= trackL;
+        player.lap++;
+        if(player.lap > 3) finish();
+    }
 
-    // Rakip Hareketleri
-    cars.forEach(car => {
-        car.z += car.speed * dt;
-        if (car.z >= trackL) car.z -= trackL;
+    cars.forEach(c => {
+        c.z += c.speed * dt;
+        if(c.z >= trackL) c.z -= trackL;
     });
 
-    document.getElementById('speed').innerText = Math.round(player.speed / 100) + " KM/H";
+    // SIRALAMA HESAPLA
+    let rank = 1;
+    cars.forEach(c => { if(c.z > player.z) rank++; });
+    document.getElementById('pos-ui').innerText = `SIRA: ${rank}/8`;
+    document.getElementById('speed-ui').innerText = Math.round(player.speed/100) + " KM/H";
 }
 
 function render() {
-    // Arka Plan (Gökyüzü ve Çimen)
-    ctx.fillStyle = '#72d7ee'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#39a032'; ctx.fillRect(0, canvas.height / 2, canvas.width, canvas.height / 2);
+    ctx.clearRect(0,0, canvas.width, canvas.height);
+    
+    // GÖKYÜZÜ
+    let grad = ctx.createLinearGradient(0,0,0, window.innerHeight);
+    grad.addColorStop(0, '#1a73e8'); grad.addColorStop(0.5, '#87ceeb');
+    ctx.fillStyle = grad; ctx.fillRect(0,0, window.innerWidth, window.innerHeight);
 
     let base = Math.floor(player.z / CFG.segL);
-    let x = 0, dx = 0;
+    let x=0, dx=0;
 
-    for (let n = 0; n < CFG.drawD; n++) {
-        let s = segments[(base + n) % segments.length];
+    for(let n=0; n<CFG.drawD; n++) {
+        let s = segments[(base + n)%segments.length];
         let loop = s.index < base;
 
-        project(s.p1, player.x * CFG.roadW - x, CFG.camH, player.z - (loop ? segments.length * CFG.segL : 0));
-        project(s.p2, player.x * CFG.roadW - x - dx, CFG.camH, player.z - (loop ? segments.length * CFG.segL : 0));
-
+        project(s.p1, player.x*CFG.roadW - x, CFG.camH, player.z - (loop?segments.length*CFG.segL:0));
+        project(s.p2, player.x*CFG.roadW - x - dx, CFG.camH, player.z - (loop?segments.length*CFG.segL:0));
+        
         x += dx; dx += s.curve;
-        if (s.p1.camera.z <= 0) continue;
 
-        // Yol Çizimi
+        if(s.p1.camera.z <= 0) continue;
+
+        // YOL
         ctx.fillStyle = s.color;
         ctx.beginPath();
         ctx.moveTo(s.p1.screen.x - s.p1.screen.w, s.p1.screen.y);
         ctx.lineTo(s.p1.screen.x + s.p1.screen.w, s.p1.screen.y);
-        ctx.lineTo(s.p2.screen.x + s.p2.screen.w, segY(s.p2));
-        ctx.lineTo(s.p2.screen.x - s.p2.screen.w, segY(s.p2));
+        ctx.lineTo(s.p2.screen.x + s.p2.screen.w, s.p2.screen.y);
+        ctx.lineTo(s.p2.screen.x - s.p2.screen.w, s.p2.screen.y);
         ctx.fill();
 
-        // Şeritler
-        if (Math.floor(s.index / 2) % 2 === 0) {
+        // BİTİŞ ÇİZGİSİ
+        if(s.index < 10) {
             ctx.fillStyle = "white";
-            ctx.fillRect(s.p1.screen.x - 5, s.p1.screen.y, 10, s.p2.screen.y - s.p1.screen.y);
+            if(s.index % 2 == 0) ctx.fillRect(s.p1.screen.x - s.p1.screen.w, s.p1.screen.y, s.p1.screen.w*2, 20);
         }
 
-        // Ağaçlar
-        if (s.tree) {
-            let treeX = s.p1.screen.x + (s.tree * s.p1.screen.w);
-            ctx.fillStyle = "#4a2d18"; ctx.fillRect(treeX - 10, s.p1.screen.y - 40, 20, 40); // Gövde
-            ctx.fillStyle = "green"; ctx.beginPath(); ctx.arc(treeX, s.p1.screen.y - 60, 30, 0, Math.PI*2); ctx.fill(); // Yapraklar
+        // AĞAÇLAR (Daha yumuşak yükleme için opaklık eklendi)
+        if(s.tree) {
+            let tx = s.p1.screen.x + (s.tree * s.p1.screen.w);
+            ctx.globalAlpha = Math.min(1, n/20); // Mesafe bazlı görünürlük
+            ctx.fillStyle = "#4caf50"; ctx.beginPath(); ctx.arc(tx, s.p1.screen.y-40, 30*s.p1.screen.scale*200, 0, Math.PI*2); ctx.fill();
+            ctx.globalAlpha = 1;
         }
     }
 
-    // Rakip Araçları Çiz
-    cars.forEach(car => {
-        let carSeg = segments[Math.floor(car.z / CFG.segL) % segments.length];
-        if (car.z > player.z && car.z < player.z + (CFG.drawD * CFG.segL)) {
-            let scale = CFG.camD / (car.z - player.z);
-            let carX = (canvas.width/2) + (scale * (car.x - player.x) * CFG.roadW * canvas.width/2);
-            let carY = (canvas.height/2) - (scale * -CFG.camH * canvas.height/2);
-            let carW = scale * 1000 * canvas.width/2;
-            
-            ctx.fillStyle = car.color;
-            ctx.fillRect(carX - carW/2, carY - carW/4, carW, carW/2);
+    // RAKİP ARABALAR
+    cars.forEach(c => {
+        if(c.z > player.z && c.z < player.z + 20000) {
+            let relZ = c.z - player.z;
+            let scale = CFG.camD / relZ;
+            let cx = (window.innerWidth/2) + (scale * (c.x - player.x) * CFG.roadW * window.innerWidth/2);
+            let cy = (window.innerHeight/2) - (scale * -CFG.camH * window.innerHeight/2);
+            let w = scale * 1200 * window.innerWidth/2;
+            ctx.fillStyle = c.color; ctx.fillRect(cx-w/2, cy-w/3, w, w/2); // Basit Araba Formu
         }
     });
 
-    // Oyuncu Aracı
-    ctx.fillStyle = "blue";
-    ctx.fillRect(canvas.width / 2 - 60, canvas.height - 120, 120, 50);
-    ctx.fillStyle = "black"; // Tekerlekler
-    ctx.fillRect(canvas.width / 2 - 70, canvas.height - 110, 20, 30);
-    ctx.fillRect(canvas.width / 2 + 50, canvas.height - 110, 20, 30);
+    // OYUNCU ARABASI (MODERN)
+    drawPlayerCar();
 }
 
-function segY(p) { return p.screen.y; }
+function drawPlayerCar() {
+    let cp = { x: window.innerWidth/2, y: window.innerHeight - 100 };
+    ctx.fillStyle = "#0071e3";
+    // Gövde
+    ctx.beginPath(); ctx.roundRect(cp.x - 70, cp.y, 140, 50, 10); ctx.fill();
+    // Cam
+    ctx.fillStyle = "rgba(255,255,255,0.3)";
+    ctx.beginPath(); ctx.moveTo(cp.x - 50, cp.y); ctx.lineTo(cp.x - 30, cp.y-25); ctx.lineTo(cp.x + 30, cp.y-25); ctx.lineTo(cp.x + 50, cp.y); ctx.fill();
+    // Stop Lambaları
+    ctx.fillStyle = "red"; ctx.fillRect(cp.x - 65, cp.y + 10, 20, 10); ctx.fillRect(cp.x + 45, cp.y + 10, 20, 10);
+}
 
-window.onresize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+function finish() {
+    running = false;
+    let rank = 1;
+    cars.forEach(c => { if(c.z > player.z) rank++; });
+    
+    document.getElementById('results').classList.remove('hidden');
+    document.getElementById('rank-text').innerText = rank + ". OLDUN!";
+    
+    let medal = "🥉";
+    if(rank == 1) medal = "🥇";
+    else if(rank <= 3) medal = "🥈";
+    document.getElementById('medal').innerText = medal;
+}
 </script>
 </body>
 </html>
