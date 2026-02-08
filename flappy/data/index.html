@@ -3,65 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Flappy Bird - Pro</title>
+    <title>Flappy Bird</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <style>
         @font-face {
             font-family: 'flappybird';
             src: url('https://db.onlinewebfonts.com/t/88c68837bc28bc89ab74977461994116.ttf') format('truetype');
         }
+        body { margin: 0; width: 100%; height: 100vh; overflow: hidden; font-family: -apple-system, sans-serif; background: #70c5ce; }
+        #Canvas { position: relative; width: 100%; height: 100%; cursor: pointer; }
         
-        body { margin: 0; width: 100%; height: 100vh; overflow: hidden; font-family: 'SF Pro Display', sans-serif; }
-        #Canvas { position: relative; width: 100%; height: 100%; background: #70c5ce; cursor: pointer; }
-        
-        /* Kuşu bir div yerine emoji veya CSS ile çiziyoruz (Resim derdi olmasın diye) */
+        /* Menü Stili */
+        #Menu {
+            position: absolute; inset: 0; background: rgba(112, 197, 206, 1);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 300; font-family: 'flappybird', sans-serif;
+        }
+        .mode-btn {
+            width: 200px; padding: 15px; margin: 10px; border: 3px solid #000;
+            border-radius: 10px; font-size: 20px; cursor: pointer; color: white;
+            text-shadow: 1px 1px 0 #000; font-weight: bold;
+        }
+        .easy { background: #2ecc71; }
+        .normal { background: #f1c40f; }
+        .hard { background: #e74c3c; }
+
         #Birdy {
-            width: 40px; height: 30px;
-            position: absolute; top: 50%; left: 20%;
-            z-index: 150; font-size: 30px;
-            display: flex; align-items: center; justify-content: center;
-            transition: transform 0.1s;
+            width: 40px; height: 30px; position: absolute; top: 50%; left: 20%;
+            z-index: 150; font-size: 30px; display: flex; align-items: center; justify-content: center;
         }
-
-        .Pipe {
-            position: absolute; top: 0; left: 100%; width: 60px;
-            background: #73bf2e; border: 2px solid #000; z-index: 10;
-        }
-
-        #Score {
-            position: absolute; top: 20px; width: 100%; text-align: center;
-            font-family: 'flappybird', Arial; font-size: 50px; color: white;
-            text-shadow: 2px 2px 0 #000; z-index: 100;
-        }
-
-        #GameOver {
-            display: none; position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%); background: #ded895;
-            border: 3px solid #000; padding: 20px; border-radius: 15px;
-            text-align: center; z-index: 200; font-family: 'flappybird', sans-serif;
-        }
-        
-        .btn-reset {
-            background: #e67e22; border: none; color: white;
-            padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-top: 10px;
-        }
+        .Pipe { position: absolute; top: 0; left: 100%; width: 60px; background: #73bf2e; border: 2px solid #000; z-index: 10; }
+        #Score { position: absolute; top: 20px; width: 100%; text-align: center; font-family: 'flappybird'; font-size: 50px; color: white; text-shadow: 2px 2px 0 #000; z-index: 100; }
+        #GameOver { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #ded895; border: 3px solid #000; padding: 20px; border-radius: 15px; text-align: center; z-index: 200; font-family: 'flappybird'; }
     </style>
 </head>
 <body>
 
+<div id="Menu">
+    <h1 style="color:white; text-shadow: 3px 3px 0 #000; font-size: 40px;">MOD SEÇ</h1>
+    <button class="mode-btn easy" onclick="initGame('easy')">KOLAY (Geniş)</button>
+    <button class="mode-btn normal" onclick="initGame('normal')">NORMAL</button>
+    <button class="mode-btn hard" onclick="initGame('hard')">ZOR (Dar)</button>
+</div>
+
 <div id="Canvas">
     <div id="Score">0</div>
     <div id="Birdy">🐦</div>
-    
     <div id="GameOver">
         <h2 style="margin:0">EYVAH!</h2>
         <p>SKOR: <span id="FinalScore">0</span></p>
-        <button class="btn-reset" onclick="resetGame()">TEKRAR DENE</button>
+        <button onclick="location.reload()" style="background:#e67e22; border:none; color:white; padding:10px 20px; border-radius:5px; cursor:pointer;">TEKRAR DENE</button>
     </div>
 </div>
 
 <script>
-    // SES ÜRETME FONKSİYONU (Dosyasız bip sesi)
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playNote(freq, type, duration) {
         const osc = audioCtx.createOscillator();
@@ -71,116 +66,86 @@
         gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
+        osc.start(); osc.stop(audioCtx.currentTime + duration);
     }
 
-    let birdY = 50;
-    let velocity = 0;
-    let gravity = 0.25;
-    let score = 0;
-    let isLost = false;
-    let pipes = [];
-    let gameLoop;
+    let birdY = 50, velocity = 0, gravity = 0.4, score = 0, isLost = false, pipes = [];
+    let gameLoop, gameStarted = false;
+    
+    // MOD AYARLARI
+    let config = { gap: 35, pipeFrequency: 0.015, speed: 1.2 };
+
+    function initGame(mode) {
+        if(mode === 'easy') { config.gap = 45; config.pipeFrequency = 0.012; config.speed = 1.0; }
+        if(mode === 'hard') { config.gap = 25; config.pipeFrequency = 0.022; config.speed = 1.8; }
+        
+        $('#Menu').fadeOut();
+        gameStarted = true;
+        startGame();
+    }
 
     function startGame() {
         gameLoop = setInterval(() => {
             if (isLost) return;
-            
-            // Yerçekimi
             velocity += gravity;
             birdY += velocity;
-            $('#Birdy').css('top', birdY + '%');
-            
-            // Dönüş efekti
-            let rotation = Math.min(velocity * 4, 90);
-            $('#Birdy').css('transform', `rotate(${rotation}deg)`);
+            $('#Birdy').css({ 'top': birdY + '%', 'transform': `rotate(${Math.min(velocity * 4, 90)}deg)` });
 
-            // Boru üretimi
-            if (Math.random() < 0.02) createPipe();
-
-            // Boru hareketi ve çarpışma
+            if (Math.random() < config.pipeFrequency) createPipe();
             movePipes();
 
-            // Sınır kontrolü
             if (birdY > 95 || birdY < 0) endGame();
-
         }, 30);
     }
 
     function createPipe() {
-        let gap = 30;
-        let topHeight = Math.random() * 40 + 10;
+        let topHeight = Math.random() * (100 - config.gap - 20) + 10;
         let pipeId = Date.now();
-        
-        // Üst Boru
-        $('<div/>').addClass('Pipe').attr('id', 'top'+pipeId).css({
-            height: topHeight + '%', left: '100%'
-        }).appendTo('#Canvas');
-
-        // Alt Boru
-        $('<div/>').addClass('Pipe').attr('id', 'bot'+pipeId).css({
-            height: (100 - topHeight - gap) + '%', 
-            top: (topHeight + gap) + '%', 
-            left: '100%'
-        }).appendTo('#Canvas');
-
-        pipes.push({ id: pipeId, left: 100, scored: false, topH: topHeight, gap: gap });
+        $('<div/>').addClass('Pipe').attr('id', 'top'+pipeId).css({ height: topHeight + '%', left: '100%' }).appendTo('#Canvas');
+        $('<div/>').addClass('Pipe').attr('id', 'bot'+pipeId).css({ height: (100 - topHeight - config.gap) + '%', top: (topHeight + config.gap) + '%', left: '100%' }).appendTo('#Canvas');
+        pipes.push({ id: pipeId, left: 100, scored: false, topH: topHeight });
     }
 
     function movePipes() {
-        pipes.forEach((p, index) => {
-            p.left -= 1.5;
+        pipes.forEach((p, i) => {
+            p.left -= config.speed;
             $(`#top${p.id}, #bot${p.id}`).css('left', p.left + '%');
 
-            // Skor
             if (!p.scored && p.left < 20) {
-                p.scored = true;
-                score++;
-                $('#Score').text(score);
-                playNote(880, 'sine', 0.1); // Skor sesi
+                p.scored = true; score++; $('#Score').text(score);
+                playNote(880, 'sine', 0.1);
             }
 
-            // Çarpışma (Basit kutu kontrolü)
             if (p.left > 15 && p.left < 25) {
-                if (birdY < p.topH || birdY > (p.topH + p.gap - 5)) {
-                    endGame();
-                }
+                if (birdY < p.topH || birdY > (p.topH + config.gap - 5)) endGame();
             }
 
-            // Temizlik
-            if (p.left < -10) {
+            if (p.left < -15) {
                 $(`#top${p.id}, #bot${p.id}`).remove();
-                pipes.splice(index, 1);
+                pipes.splice(i, 1);
             }
         });
     }
 
     function jump() {
-        if (isLost) return;
+        if (!gameStarted || isLost) return;
         if (audioCtx.state === 'suspended') audioCtx.resume();
-        velocity = -5;
-        playNote(440, 'square', 0.05); // Zıplama sesi
+        velocity = -7;
+        playNote(440, 'square', 0.05);
     }
 
     function endGame() {
         isLost = true;
         clearInterval(gameLoop);
-        playNote(110, 'sawtooth', 0.3); // Kaybetme sesi
+        playNote(110, 'sawtooth', 0.3);
         $('#FinalScore').text(score);
         $('#GameOver').fadeIn();
-    }
-
-    function resetGame() {
-        location.reload();
     }
 
     $(document).on('mousedown keydown', (e) => {
         if (e.type === 'keydown' && e.which !== 32) return;
         jump();
     });
-
-    startGame();
 </script>
 </body>
 </html>
