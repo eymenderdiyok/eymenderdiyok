@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEON OVERDRIVE | ULTRA MODERN</title>
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-pink: #ff00ff;
+            --glass: rgba(0, 0, 0, 0.8);
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background: #000; overflow: hidden;
+            font-family: 'Segoe UI', sans-serif; color: white;
+            text-transform: uppercase;
+        }
+
+        #game-container { position: relative; width: 100vw; height: 100vh; }
+        canvas { width: 100%; height: 100%; display: block; }
+
+        /* UI */
+        .overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: radial-gradient(circle, rgba(10,20,40,0.95) 0%, #000 100%);
+            z-index: 100;
+        }
+
+        .hidden { display: none !important; }
+
+        h1 {
+            font-size: 4.5rem; letter-spacing: 12px; margin-bottom: 2rem;
+            text-shadow: 0 0 20px var(--neon-blue);
+            text-align: center;
+        }
+
+        .menu-box {
+            background: var(--glass); padding: 40px; border-radius: 15px;
+            border: 1px solid var(--neon-blue); text-align: center;
+        }
+
+        .btn {
+            background: transparent; border: 2px solid var(--neon-blue);
+            color: var(--neon-blue); padding: 12px 35px; font-size: 1.2rem;
+            cursor: pointer; margin: 10px; transition: 0.3s;
+            font-weight: bold;
+        }
+
+        .btn:hover, .btn.active {
+            background: var(--neon-blue); color: #000;
+            box-shadow: 0 0 25px var(--neon-blue);
+        }
+
+        #hud {
+            position: absolute; top: 30px; left: 30px; width: calc(100% - 60px);
+            display: flex; justify-content: space-between; font-size: 2rem;
+            pointer-events: none; z-index: 50; font-weight: 900;
+        }
+
+        .speedometer {
+            position: absolute; bottom: 40px; right: 40px;
+            text-align: right; font-size: 3rem;
+            border-bottom: 5px solid var(--neon-blue);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+
+        <div id="main-menu" class="overlay">
+            <h1>NEON OVERDRIVE</h1>
+            <div class="menu-box">
+                <p>ZORLUK SEÇİMİ</p>
+                <button class="btn diff-opt" onclick="setDifficulty('EASY', this)">KOLAY</button>
+                <button class="btn diff-opt active" onclick="setDifficulty('NORMAL', this)">NORMAL</button>
+                <button class="btn diff-opt" onclick="setDifficulty('HARD', this)">ZOR</button>
+                <br><br>
+                <button class="btn" style="width:100%; font-size: 1.8rem;" onclick="startRace()">YARIŞI BAŞLAT</button>
+            </div>
+        </div>
+
+        <div id="hud" class="hidden">
+            <div id="pos-ui">POS: 1/8</div>
+            <div id="lap-ui">LAP: 1/3</div>
+        </div>
+        <div id="speed-ui" class="speedometer hidden">0 <small>KM/H</small></div>
+
+        <div id="results" class="overlay hidden">
+            <h2 id="final-rank" style="font-size: 5rem;">1. OLDUN!</h2>
+            <button class="btn" onclick="location.reload()">TEKRAR DENE</button>
+        </div>
+    </div>
+
+<script>
+/**
+ * ULTRA MODERN RACING ENGINE - MASTER
+ */
+const CONFIG = {
+    FPS: 60, ROAD_W: 2000, SEG_L: 200, CAM_H: 1000, 
+    CAM_D: 0.84, DRAW_D: 250, MAX_S: 25000, ACCEL: 8000
+};
+
+let canvas, ctx, player, segments = [], cars = [], running = false;
+let keys = {};
+let selectedDifficulty = 'NORMAL';
+
+// Input Management
+window.onkeydown = e => keys[e.code] = true;
+window.onkeyup = e => keys[e.code] = false;
+
+function setDifficulty(mode, el) {
+    selectedDifficulty = mode;
+    document.querySelectorAll('.diff-opt').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+}
+
+function startRace() {
+    document.getElementById('main-menu').classList.add('hidden');
+    document.getElementById('hud').classList.remove('hidden');
+    document.getElementById('speed-ui').classList.remove('hidden');
+    
+    initEngine();
+}
+
+function initEngine() {
+    canvas = document.getElementById('gameCanvas');
+    ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    player = { x: 0, z: 0, speed: 0, lap: 1 };
+    segments = [];
+
+    // Track Generation (Virajlı Yol Oluşturma)
+    for(let i = 0; i < 800; i++) {
+        segments.push({
+            index: i,
+            p1: { world: { z: i * CONFIG.SEG_L }, screen: {} },
+            p2: { world: { z: (i + 1) * CONFIG.SEG_L }, screen: {} },
+            curve: i > 100 && i < 200 ? 2 : i > 350 && i < 500 ? -3 : i > 600 ? 4 : 0,
+            color: Math.floor(i / 3) % 2 ? '#111' : '#181818'
+        });
+    }
+
+    // AI Bots
+    cars = [];
+    for(let i = 0; i < 7; i++) {
+        cars.push({
+            x: Math.random() * 1.6 - 0.8,
+            z: (i + 1) * 15000,
+            speed: 12000 + (Math.random() * 5000),
+            color: `hsl(${i * 50}, 100%, 50%)`
+        });
+    }
+
+    running = true;
+    lastFrame = performance.now();
+    requestAnimationFrame(gameLoop);
+}
+
+function project(p, camX, camY, camZ) {
+    p.camera = { x: (p.world.x || 0) - camX, y: (p.world.y || 0) - camY, z: p.world.z - camZ };
+    p.screen.scale = CONFIG.CAM_D / p.camera.z;
+    p.screen.x = (canvas.width / 2) + (p.screen.scale * p.camera.x * canvas.width / 2);
+    p.screen.y = (canvas.height / 2) - (p.screen.scale * p.camera.y * canvas.height / 2);
+    p.screen.w = (p.screen.scale * CONFIG.ROAD_W * canvas.width / 2);
+}
+
+function gameLoop(time) {
+    if(!running) return;
+    let dt = (time - lastFrame) / 1000;
+    lastFrame = time;
+
+    update(dt);
+    render();
+    requestAnimationFrame(gameLoop);
+}
+
+function update(dt) {
+    let trackLength = segments.length * CONFIG.SEG_L;
+
+    // Controls
+    if(keys['ArrowUp'] || keys['KeyW']) player.speed += CONFIG.ACCEL * dt;
+    else if(keys['ArrowDown'] || keys['KeyS']) player.speed -= CONFIG.ACCEL * 1.5 * dt;
+    else player.speed -= CONFIG.ACCEL * 0.5 * dt;
+
+    if(keys['ArrowLeft'] || keys['KeyA']) player.x -= 1.8 * dt * (player.speed / CONFIG.MAX_S + 0.1);
+    if(keys['ArrowRight'] || keys['KeyD']) player.x += 1.8 * dt * (player.speed / CONFIG.MAX_S + 0.1);
+
+    // Physics
+    player.speed = Math.max(0, Math.min(player.speed, CONFIG.MAX_S));
+    player.z += player.speed * dt;
+    player.x = Math.max(-2, Math.min(player.x, 2));
+
+    // Bots Movement
+    cars.forEach(c => {
+        c.z += c.speed * dt;
+        if(c.z >= trackLength) c.z -= trackLength;
+    });
+
+    // Lap & Win Condition
+    if(player.z >= trackLength) {
+        player.z -= trackLength;
+        player.lap++;
+        if(player.lap > 3) {
+            running = false;
+            showResults();
+        }
+    }
+
+    // HUD Update
+    document.getElementById('speed-ui').innerHTML = Math.round(player.speed / 100) + " <small>KM/H</small>";
+    document.getElementById('pos-ui').innerText = "POS: " + (cars.filter(c => c.z > player.z).length + 1) + "/8";
+}
+
+function render() {
+    ctx.fillStyle = '#050a10';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    let baseIdx = Math.floor(player.z / CONFIG.SEG_L);
+    let x = 0, dx = 0;
+
+    for(let n = 0; n < CONFIG.DRAW_D; n++) {
+        let seg = segments[(baseIdx + n) % segments.length];
+        let loop = seg.index < baseIdx;
+
+        project(seg.p1, player.x * CONFIG.ROAD_W - x, CONFIG.CAM_H, player.z - (loop ? segments.length * CONFIG.SEG_L : 0));
+        project(seg.p2, player.x * CONFIG.ROAD_W - x - dx, CONFIG.CAM_H, player.z - (loop ? segments.length * CONFIG.SEG_L : 0));
+        
+        x += dx;
+        dx += seg.curve;
+
+        if(seg.p1.camera.z <= 0) continue;
+
+        // Draw Road
+        ctx.fillStyle = seg.color;
+        ctx.beginPath();
+        ctx.moveTo(seg.p1.screen.x - seg.p1.screen.w, seg.p1.screen.y);
+        ctx.lineTo(seg.p1.screen.x + seg.p1.screen.w, seg.p1.screen.y);
+        ctx.lineTo(seg.p2.screen.x + seg.p2.screen.w, seg.p2.screen.y);
+        ctx.lineTo(seg.p2.screen.x - seg.p2.screen.w, seg.p2.screen.y);
+        ctx.fill();
+
+        // Markers
+        if(n % 2 === 0) {
+            ctx.fillStyle = '#00f3ff';
+            ctx.fillRect(seg.p1.screen.x - seg.p1.screen.w - 5, seg.p1.screen.y, 10, 2);
+            ctx.fillRect(seg.p1.screen.x + seg.p1.screen.w - 5, seg.p1.screen.y, 10, 2);
+        }
+    }
+
+    // Player Car
+    ctx.fillStyle = '#ff00ff';
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = '#ff00ff';
+    ctx.fillRect(canvas.width / 2 - 50, canvas.height - 100, 100, 40);
+    ctx.shadowBlur = 0;
+}
+
+function showResults() {
+    document.getElementById('results').classList.remove('hidden');
+    let rank = (cars.filter(c => c.z > player.z).length + 1);
+    document.getElementById('final-rank').innerText = rank + ". OLDUN!";
+}
+
+window.onresize = () => {
+    if(canvas) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+};
+</script>
+</body>
+</html>
