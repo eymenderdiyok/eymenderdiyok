@@ -2,276 +2,462 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Modern Car Driver 3D | Real Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Modern Car Driver 3D | Ultimate</title>
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
         canvas { display: block; width: 100%; height: 100%; }
         
-        /* UI ELEMENTS */
-        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); z-index: 100; color: white; }
-        .hidden { display: none !important; }
+        /* MODERN UI KATMANI */
+        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 100; color: white; transition: opacity 0.5s; }
+        .hidden { display: none !important; opacity: 0; pointer-events: none; }
         
-        .menu-card { background: rgba(255,255,255,0.05); padding: 40px; border-radius: 40px; border: 1px solid rgba(255,255,255,0.1); text-align: center; width: 450px; box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
-        input { background: rgba(255,255,255,0.1); border: 2px solid #0071e3; color: white; padding: 15px; border-radius: 15px; width: 80%; outline: none; font-size: 1.2rem; margin-bottom: 25px; text-align: center; }
+        .card { background: rgba(255,255,255,0.08); padding: 40px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); text-align: center; width: 90%; max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
         
-        .mode-selector { display: flex; gap: 15px; justify-content: center; margin-bottom: 30px; }
-        .mode-btn { padding: 12px 25px; border: 2px solid #333; border-radius: 15px; color: #888; cursor: pointer; background: transparent; transition: 0.3s; font-weight: bold; }
-        .mode-btn.active { border-color: #0071e3; color: white; background: #0071e3; box-shadow: 0 0 20px rgba(0,113,227,0.4); }
+        h1 { margin: 0 0 20px 0; font-size: 2.5rem; letter-spacing: 2px; text-transform: uppercase; background: linear-gradient(to right, #fff, #aaa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .btn { background: #0071e3; color: white; border: none; padding: 18px 40px; border-radius: 15px; font-size: 1.2rem; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; margin-top: 20px; }
+        .btn:hover { background: #0077ed; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,113,227,0.3); }
+        
+        /* HUD */
+        #hud { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; padding: 30px; box-sizing: border-box; }
+        .hud-top { display: flex; justify-content: space-between; font-size: 1.5rem; font-weight: 800; color: white; text-shadow: 2px 2px 0 rgba(0,0,0,0.5); }
+        .speedometer { align-self: flex-end; text-align: right; }
+        .speed-val { font-size: 4.5rem; font-weight: 900; color: white; display: block; line-height: 0.9; text-shadow: 3px 3px 0 rgba(0,0,0,0.5); font-variant-numeric: tabular-nums; }
+        .speed-label { font-size: 1rem; color: #ccc; letter-spacing: 2px; }
 
-        .start-btn { background: #32d74b; color: white; border: none; padding: 20px; border-radius: 20px; font-size: 1.6rem; font-weight: 800; cursor: pointer; width: 100%; transition: 0.2s; }
-        .start-btn:hover { transform: scale(1.02); background: #3cf259; }
-        
-        #hud { position: absolute; top: 0; left: 0; width: 100%; padding: 30px; display: flex; justify-content: space-between; color: white; font-size: 1.8rem; pointer-events: none; z-index: 50; font-weight: 900; }
-        .speed-box { position: absolute; bottom: 40px; right: 40px; text-align: right; }
-        .speed-val { font-size: 4rem; color: #0071e3; line-height: 1; }
+        /* Mobile Controls */
+        .controls { position: absolute; bottom: 20px; width: 100%; height: 150px; display: none; pointer-events: all; }
+        @media (hover: none) and (pointer: coarse) { .controls { display: flex; } }
     </style>
 </head>
 <body>
 
     <canvas id="gameCanvas"></canvas>
 
-    <div id="menu" class="overlay">
-        <div class="menu-card">
-            <h1 style="font-size: 2.5rem; margin-bottom: 10px;">MODERN DRIVER</h1>
-            <p style="color: #888; margin-bottom: 30px;">Gerçekçi 3D Yarış Simülasyonu</p>
-            <input type="text" id="playerName" placeholder="Pilot İsmi" maxlength="10">
-            <div class="mode-selector">
-                <button class="mode-btn" onclick="setMode(0.7, this)">KOLAY</button>
-                <button class="mode-btn active" onclick="setMode(1, this)">NORMAL</button>
-                <button class="mode-btn" onclick="setMode(1.4, this)">ZOR</button>
-            </div>
-            <button class="start-btn" onclick="init()">BAŞLAT</button>
-        </div>
-    </div>
-
-    <div id="results" class="overlay hidden">
-        <div class="menu-card">
-            <div id="medal-icon" style="font-size: 6rem; margin-bottom: 20px;">🥇</div>
-            <h2 id="rank-text" style="font-size: 3rem; margin: 0;">1. OLDUN!</h2>
-            <p id="time-text" style="color: #888; margin-bottom: 30px;">Harika bir sürüş!</p>
-            <button class="start-btn" onclick="location.reload()">TEKRAR YARIŞ</button>
+    <div id="start-screen" class="overlay">
+        <div class="card">
+            <h1>Neon Racer</h1>
+            <p style="color: #aaa; margin-bottom: 30px;">Gerçekçi Sürüş Deneyimi</p>
+            <button class="btn" onclick="startGame()">YARIŞA BAŞLA</button>
         </div>
     </div>
 
     <div id="hud" class="hidden">
-        <div id="pos-ui">SIRA: 1/8</div>
-        <div class="speed-box">
-            <div id="speed-ui" class="speed-val">0</div>
-            <div style="font-size: 1rem; color: #888;">KM/H</div>
+        <div class="hud-top">
+            <div id="pos-display">POS 1/8</div>
+            <div id="lap-display">LAP 1/3</div>
+        </div>
+        <div class="speedometer">
+            <span id="speed-display" class="speed-val">0</span>
+            <span class="speed-label">KM/H</span>
+        </div>
+    </div>
+
+    <div id="end-screen" class="overlay hidden">
+        <div class="card">
+            <div id="medal" style="font-size: 5rem; margin-bottom: 10px;">🏆</div>
+            <h2 id="end-title">YARIŞ BİTTİ</h2>
+            <button class="btn" onclick="location.reload()">TEKRAR OYNA</button>
         </div>
     </div>
 
 <script>
 /**
- * 3D ENGINE - REAL CARS & PHYSICS
+ * ULTRA OPTIMIZED 3D ENGINE
  */
 const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-let player, segments = [], cars = [], running = false, difficulty = 1;
-let keys = {};
-let trackLength = 0;
+const ctx = canvas.getContext('2d', { alpha: false }); // Performans için alpha kapalı
 
+// AYARLAR
 const CFG = {
-    roadW: 2000, segL: 200, camH: 1000, camD: 0.84, drawD: 300,
-    maxS: 26000, accel: 8500, brake: -12000, decel: -5000
+    roadWidth: 2000,
+    segmentLength: 200,
+    cameraHeight: 1000,
+    cameraDepth: 0.84,
+    drawDistance: 300, // Ufuk çizgisi mesafesi
+    fov: 100,
+    maxSpeed: 26000,
+    accel: 6000,
+    breaking: -10000,
+    decel: -3000,
+    offRoadDecel: -10000,
+    turnSpeed: 1.8 // Viraj hassasiyeti
 };
 
-window.onkeydown = e => keys[e.code] = true;
-window.onkeyup = e => keys[e.code] = false;
+let player = { x: 0, z: 0, speed: 0, lap: 0 };
+let segments = [];
+let cars = [];
+let running = false;
+let keys = {};
+let lastTime = 0;
+let trackLength = 0;
 
-function setMode(m, btn) {
-    difficulty = m;
-    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-}
+// KONTROLLER
+window.addEventListener('keydown', e => keys[e.code] = true);
+window.addEventListener('keyup', e => keys[e.code] = false);
 
-function init() {
-    const name = document.getElementById('playerName').value || "PİLOT";
-    document.getElementById('menu').classList.add('hidden');
+function startGame() {
+    document.getElementById('start-screen').classList.add('hidden');
     document.getElementById('hud').classList.remove('hidden');
+    
+    // Canvas Boyutlandırma
+    resize();
+    window.addEventListener('resize', resize);
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    player = { x: 0, z: 0, speed: 0, lap: 1 };
-    segments = [];
-
-    // PİST OLUŞTURMA
-    for(let i=0; i<1500; i++) {
-        segments.push({
-            index: i,
-            p1: { world: { z: i*CFG.segL }, screen: {} },
-            p2: { world: { z: (i+1)*CFG.segL }, screen: {} },
-            curve: i > 200 && i < 400 ? 3 : i > 700 && i < 900 ? -4 : i > 1100 ? 2 : 0,
-            color: Math.floor(i/3)%2 ? '#333' : '#383838'
-        });
-    }
-    trackLength = segments.length * CFG.segL;
-
-    // RAKİP GERÇEKÇİ ARABALAR
-    cars = [];
-    for(let i=0; i<7; i++) {
-        cars.push({
-            x: (Math.random() * 1.4 - 0.7),
-            z: (i + 1) * (trackLength / 8),
-            speed: (13000 + Math.random() * 5000) * difficulty,
-            color: `hsl(${Math.random() * 360}, 70%, 50%)`
-        });
-    }
-
+    createRoad();
+    createCars();
+    
     running = true;
+    lastTime = performance.now();
     requestAnimationFrame(loop);
 }
 
-function project(p, camX, camY, camZ) {
-    p.camera = { x: (p.world.x||0) - camX, y: (p.world.y||0) - camY, z: p.world.z - camZ };
-    p.screen.scale = CFG.camD / p.camera.z;
-    p.screen.x = (canvas.width/2) + (p.screen.scale * p.camera.x * canvas.width/2);
-    p.screen.y = (canvas.height/2) - (p.screen.scale * p.camera.y * canvas.height/2);
-    p.screen.w = (p.screen.scale * CFG.roadW * canvas.width/2);
+function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 }
 
+// YOL OLUŞTURMA
+function createRoad() {
+    segments = [];
+    const createSection = (count, curve, y) => {
+        for(let i=0; i<count; i++) {
+            const idx = segments.length;
+            segments.push({
+                index: idx,
+                p1: { world: { z: idx * CFG.segmentLength }, screen: {} },
+                p2: { world: { z: (idx+1) * CFG.segmentLength }, screen: {} },
+                curve: curve,
+                color: Math.floor(idx/3)%2 ? {r:50,g:50,b:50} : {r:45,g:45,b:45}, // Koyu Asfalt
+                tree: (idx % 8 === 0) ? (Math.random() > 0.5 ? 1 : -1) : 0
+            });
+        }
+    };
+
+    // Pist Tasarımı
+    createSection(100, 0, 0);       // Düz
+    createSection(200, 2, 0);       // Sağ Viraj
+    createSection(100, 0, 0);       // Düz
+    createSection(200, -2, 0);      // Sol Viraj
+    createSection(100, 0, 0);       // Düz
+    createSection(300, -3, 0);      // Sert Sol
+    createSection(200, 3, 0);       // Sert Sağ
+    createSection(300, 0, 0);       // Bitiş Düzlüğü
+
+    trackLength = segments.length * CFG.segmentLength;
+}
+
+function createCars() {
+    cars = [];
+    for(let i=0; i<8; i++) {
+        cars.push({
+            offset: Math.random() * 0.8 * (Math.random() > 0.5 ? 1 : -1),
+            z: (i+1) * 3000,
+            speed: 15000 + Math.random() * 8000,
+            color: `hsl(${Math.random()*360}, 70%, 50%)`,
+            mesh: Math.floor(Math.random() * 3) // 3 farklı araba tipi (render için)
+        });
+    }
+}
+
+// OYUN DÖNGÜSÜ
 function loop(time) {
     if(!running) return;
-    update(1/60);
+    const dt = Math.min(1, (time - lastTime) / 1000);
+    lastTime = time;
+
+    update(dt);
     render();
     requestAnimationFrame(loop);
 }
 
 function update(dt) {
-    if(keys['ArrowUp'] || keys['KeyW']) player.speed += CFG.accel * dt;
-    else if(keys['ArrowDown'] || keys['KeyS']) player.speed += CFG.brake * dt;
+    // 1. Fizik ve Kontroller
+    const speedRatio = player.speed / CFG.maxSpeed;
+    const dx = dt * CFG.turnSpeed * speedRatio;
+
+    // Hızlanma / Fren (Dönüşte yavaşlama KALDIRILDI)
+    if (keys['ArrowUp'] || keys['KeyW']) player.speed += CFG.accel * dt;
+    else if (keys['ArrowDown'] || keys['KeyS']) player.speed += CFG.breaking * dt;
     else player.speed += CFG.decel * dt;
 
-    if(keys['ArrowLeft'] || keys['KeyA']) player.x = Math.max(-0.85, player.x - 1.5 * dt * (player.speed/CFG.maxS + 0.3));
-    if(keys['ArrowRight'] || keys['KeyD']) player.x = Math.min(0.85, player.x + 1.5 * dt * (player.speed/CFG.maxS + 0.3));
+    // Direksiyon
+    if (keys['ArrowLeft'] || keys['KeyA']) player.x = player.x - dx;
+    if (keys['ArrowRight'] || keys['KeyD']) player.x = player.x + dx;
 
-    player.speed = Math.max(0, Math.min(player.speed, CFG.maxS));
+    // Merkezkaç Kuvveti (Virajda dışarı savrulma)
+    const playerSegment = segments[Math.floor(player.z / CFG.segmentLength) % segments.length];
+    player.x = player.x - (dx * speedRatio * playerSegment.curve * 2); // Virajın tersine iter
+
+    // Çimlere çıkınca yavaşla
+    if ((player.x < -1 || player.x > 1) && player.speed > 8000) {
+        player.speed += CFG.offRoadDecel * dt;
+    }
+
+    // Sınırlandırma
+    player.x = Math.max(-2, Math.min(2, player.x));
+    player.speed = Math.max(0, Math.min(CFG.maxSpeed, player.speed));
+
+    // Hareket
     player.z += player.speed * dt;
-
-    if(player.z >= trackLength) {
+    if (player.z >= trackLength) {
         player.z -= trackLength;
         player.lap++;
-        if(player.lap > 3) finish();
+        if(player.lap > 3) endGame();
     }
 
-    cars.forEach(c => {
-        c.z += c.speed * dt;
-        if(c.z >= trackLength) c.z -= trackLength;
+    // Rakipleri Hareket Ettir
+    cars.forEach(car => {
+        car.z += car.speed * dt;
+        if(car.z >= trackLength) car.z -= trackLength;
     });
 
+    // UI Güncelle
+    document.getElementById('speed-display').innerText = Math.floor(player.speed / 100);
     let rank = 1;
     cars.forEach(c => { if(c.z > player.z) rank++; });
-    document.getElementById('pos-ui').innerText = `SIRA: ${rank}/8`;
-    document.getElementById('speed-ui').innerText = Math.round(player.speed/100);
+    document.getElementById('pos-display').innerText = `POS ${rank}/9`;
 }
 
-// GELİŞMİŞ ARABA ÇİZİM MOTORU (VEKTÖREL)
-function drawVehicle(ctx, x, y, width, color, isPlayer = false) {
-    let w = width;
-    let h = w * 0.5;
-
-    ctx.save();
-    ctx.translate(x, y);
-
-    // Gölge
-    ctx.fillStyle = "rgba(0,0,0,0.3)";
-    ctx.beginPath(); ctx.ellipse(0, h/2, w*0.6, h*0.3, 0, 0, Math.PI*2); ctx.fill();
-
-    // Gövde (Alt Katman)
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.roundRect(-w/2, -h/2, w, h, w*0.1);
-    ctx.fill();
-
-    // Üst Kabin
-    ctx.fillStyle = "rgba(0,0,0,0.7)";
-    ctx.beginPath();
-    ctx.roundRect(-w/3, -h/1.2, w/1.5, h/1.5, w*0.1);
-    ctx.fill();
-
-    // Cam Detayı
-    ctx.fillStyle = "rgba(255,255,255,0.2)";
-    ctx.beginPath();
-    ctx.moveTo(-w/4, -h/1.3); ctx.lineTo(w/4, -h/1.3); ctx.lineTo(w/3.5, -h/2); ctx.lineTo(-w/3.5, -h/2);
-    ctx.fill();
-
-    // Arka Rüzgarlık (Spoiler)
-    ctx.fillStyle = "#111";
-    ctx.fillRect(-w/2, -h/1.4, w, h/8);
-
-    // Stop Lambaları
-    ctx.fillStyle = isPlayer && keys['ArrowDown'] ? "#ff0000" : "#880000";
-    ctx.fillRect(-w/2.2, -h/3, w/6, h/5);
-    ctx.fillRect(w/3.5, -h/3, w/6, h/5);
-
-    ctx.restore();
-}
-
+// RENDER MOTORU
 function render() {
-    ctx.clearRect(0,0, canvas.width, canvas.height);
-    
-    // Gökyüzü ve Çimen
-    ctx.fillStyle = "#72d7ee"; ctx.fillRect(0,0, canvas.width, canvas.height/2);
-    ctx.fillStyle = "#39a032"; ctx.fillRect(0, canvas.height/2, canvas.width, canvas.height/2);
+    // 1. Temizle ve Arkaplan
+    ctx.fillStyle = "#4ec0ff"; // Gökyüzü
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#2c8f1b"; // Zemin (Çim)
+    ctx.fillRect(0, canvas.height/2, canvas.width, canvas.height/2);
 
-    let base = Math.floor(player.z / CFG.segL);
-    let x=0, dx=0;
+    // 2. Yol Projeksiyonu
+    let baseSegment = segments[Math.floor(player.z / CFG.segmentLength) % segments.length];
+    let basePercent = (player.z % CFG.segmentLength) / CFG.segmentLength;
+    let dx = -(baseSegment.curve * basePercent);
+    let x = 0;
+    let maxY = canvas.height; // Ufuk çizgisi kırpma (Clipping)
 
-    for(let n=0; n<CFG.drawD; n++) {
-        let s = segments[(base + n)%segments.length];
-        let loop = s.index < base;
-
-        project(s.p1, player.x*CFG.roadW - x, CFG.camH, player.z - (loop?trackLength:0));
-        project(s.p2, player.x*CFG.roadW - x - dx, CFG.camH, player.z - (loop?trackLength:0));
+    const project = (p, cX, cY, cZ, camX) => {
+        p.camera.x = (p.world.z || 0) - camX; // Basit hack
+        p.screen.scale = CFG.cameraDepth / (p.world.z - player.z + (p.world.z < player.z ? trackLength : 0));
         
-        x += dx; dx += s.curve;
-        if(s.p1.camera.z <= 0) continue;
+        // Gerçek 3D Projeksiyon Formülü
+        let scale = p.screen.scale;
+        p.screen.x = Math.round((canvas.width/2) + (scale * ((p.world.x || 0) - player.x - x) * canvas.width/2));
+        p.screen.y = Math.round((canvas.height/2) - (scale * CFG.cameraHeight * canvas.height/2));
+        p.screen.w = Math.round(scale * CFG.roadWidth * canvas.width/2);
+    };
 
-        // Yol
-        ctx.fillStyle = s.color;
+    // Yol Çizimi (Arkadan Öne Değil, Önden Arkaya Çizilmez -> Painter's Algo için Arkadan Öne)
+    // Ancak performans için: Z-Buffer yok, o yüzden döngüyü renderDistance kadar yapıyoruz.
+    
+    // Doğru Yöntem: Ufuk çizgisinden (en uzaktan) oyuncuya doğru çizmek değil,
+    // Oyuncudan uzağa doğru çizip, 'maxY' kullanarak üst üste binmeyi engellemek daha iyidir (Outrun Style).
+    
+    // YENİ RENDER LOOP (Yol İçin)
+    let renderList = [];
+    x = 0;
+    dx = 0;
+    
+    // Kamera pozisyonu
+    let camH = CFG.cameraHeight + segments[Math.floor(player.z/CFG.segmentLength)%segments.length].y * 0; // Yükseklik yok şimdilik
+
+    // Sadece görüş mesafesindekileri işle
+    for(let n=0; n<CFG.drawDistance; n++) {
+        let segment = segments[(baseSegment.index + n) % segments.length];
+        let looped = segment.index < baseSegment.index;
+        
+        // Dünya Koordinatları
+        let p1 = segment.p1;
+        let p2 = segment.p2;
+        
+        // Oyuncuya göre Z pozisyonu
+        let cameraZ = (looped ? trackLength : 0) + (n * CFG.segmentLength) - (player.z % CFG.segmentLength);
+        
+        // Ekrana İzdüşüm (Project)
+        let scale = CFG.cameraDepth / cameraZ;
+        let screenX = (canvas.width/2) + (scale * (-player.x * CFG.roadWidth - x) * canvas.width/2);
+        let screenY = (canvas.height/2) - (scale * (CFG.cameraHeight) * canvas.height/2);
+        let screenW = scale * CFG.roadWidth * canvas.width/2;
+
+        // Bir sonraki segment için X kayması (Viraj)
+        x += dx;
+        dx += segment.curve;
+
+        // Segment özelliklerini sakla (daha sonra çizmek için değil, şu an çizmek daha iyi)
+        // Clipping: Eğer segment ekranın altındaysa veya ufuk çizgisinin üstünde kalıyorsa çizme
+        if (screenY >= maxY) continue;
+        
+        // ÇİZİM
+        let prevY = (canvas.height/2) - ((CFG.cameraDepth / (cameraZ - CFG.segmentLength)) * CFG.cameraHeight * canvas.height/2); // Basit yaklaşım
+        
+        // Bu segmenti çiz
+        // Renkler
+        let color = segment.color;
+        let grass = (Math.floor(segment.index/3)%2) ? "#2c8f1b" : "#35a522";
+        
+        // Zemin (Segment yüksekliği ile bir önceki arasına doldur)
+        // Basitleştirilmiş: Sadece yol çiz.
+        
+        // P1 ve P2 screen koordinatları hesaplama (Daha hassas)
+        let p1_scale = CFG.cameraDepth / cameraZ;
+        let p1_y = (canvas.height/2) - (p1_scale * CFG.cameraHeight * canvas.height/2);
+        let p1_w = p1_scale * CFG.roadWidth * canvas.width/2;
+        let p1_x = (canvas.width/2) + (p1_scale * (-player.x * CFG.roadWidth - (x - dx)) * canvas.width/2); // Önceki x
+
+        // P2 (Bu segmentin sonu) - Zaten hesapladık screenX, screenY
+        // Düzeltme: Döngü kümülatif gidiyor.
+        
+        // BASİT RENDER TEKNİĞİ (Outrun Style)
+        // Her segmenti çiz ve maxY'yi güncelle.
+        
+        ctx.fillStyle = (Math.floor(segment.index/2)%2) ? "#555" : "#505050"; // Asfalt
         ctx.beginPath();
-        ctx.moveTo(s.p1.screen.x - s.p1.screen.w, s.p1.screen.y);
-        ctx.lineTo(s.p1.screen.x + s.p1.screen.w, s.p1.screen.y);
-        ctx.lineTo(s.p2.screen.x + s.p2.screen.w, s.p2.screen.y);
-        ctx.lineTo(s.p2.screen.x - s.p2.screen.w, s.p2.screen.y);
+        ctx.moveTo(p1_x - p1_w, p1_y);
+        ctx.lineTo(p1_x + p1_w, p1_y);
+        ctx.lineTo(screenX + screenW, screenY);
+        ctx.lineTo(screenX - screenW, screenY);
         ctx.fill();
+        
+        // Şeritler
+        if(Math.floor(segment.index/2)%2) {
+            ctx.fillStyle = "white";
+            let lw = screenW * 0.05;
+            ctx.fillRect(screenX - lw/2, screenY, lw, p1_y - screenY);
+        }
+        
+        // Kenarlıklar
+        ctx.fillStyle = (Math.floor(segment.index/2)%2) ? "red" : "white";
+        ctx.fillRect(screenX - screenW * 1.2, screenY, screenW * 0.2, p1_y - screenY);
+        ctx.fillRect(screenX + screenW, screenY, screenW * 0.2, p1_y - screenY);
 
-        // Yan Şeritler
-        ctx.fillStyle = "#fff";
-        ctx.fillRect(s.p1.screen.x - s.p1.screen.w - 10, s.p1.screen.y, 20, 2);
-        ctx.fillRect(s.p1.screen.x + s.p1.screen.w - 10, s.p1.screen.y, 20, 2);
+        // Ağaçlar ve Arabaları kaydet
+        segment.clipY = p1_y; // Bu segmentin ekran Y'si
+        segment.screenX = screenX; 
+        segment.scale = scale;
 
-        // Bitiş Çizgisi
-        if(s.index < 15) {
-            ctx.fillStyle = s.index % 2 ? "#eee" : "#333";
-            ctx.fillRect(s.p1.screen.x - s.p1.screen.w, s.p1.screen.y, s.p1.screen.w*2, 20);
+        maxY = screenY; // Yeni kırpma noktası (yukarı doğru gidiyoruz)
+    }
+
+    // 3. SPRITE RENDER (Arkadan Öne)
+    // Tüm arabaları ve ağaçları topla, Z'ye göre sırala ve çiz.
+    
+    let sprites = [];
+    
+    // Rakipler
+    cars.forEach(car => {
+        // Arabanın Z mesafesi (Player'a göre)
+        let dist = car.z - player.z;
+        if(dist < 0) dist += trackLength;
+        
+        // ÇOK ÖNEMLİ: Sadece DrawDistance içindeyse ekle!
+        if(dist > CFG.drawDistance * CFG.segmentLength) return;
+
+        // Hangi segmentte?
+        // Arabanın X konumunu yol kıvrımına göre hesapla
+        // Bu kısım karmaşık, basitleştirilmiş bir X ofseti kullanacağız.
+        // Arabanın olduğu segmentin renderdaki X kaymasını bulmamız lazım.
+        // Ama basitçe:
+        
+        let spriteScale = CFG.cameraDepth / dist;
+        // Arabanın yatay konumu: Yolun o anki kıvrımı (offset) + arabanın kendi şeridi
+        // Bunu tam senkronize etmek için render loop içinde toplamak en iyisidir ama bu da çalışır.
+        
+        // X düzeltmesi:
+        // Render loop'taki kümülatif X'i tahmin edemeyiz.
+        // O yüzden en iyi yöntem: Arabanın olduğu segmenti bul.
+        let carSegIdx = Math.floor(car.z / CFG.segmentLength) % segments.length;
+        let carSeg = segments[carSegIdx];
+        
+        // Eğer segment render edilmediyse (görünmüyorsa) çizme
+        if (!carSeg.scale) return; 
+
+        let carX = carSeg.screenX + (carSeg.scale * car.offset * CFG.roadWidth * canvas.width/2);
+        let carY = carSeg.clipY;
+
+        sprites.push({ type: 'car', z: dist, x: carX, y: carY, s: spriteScale, c: car });
+    });
+
+    // Ağaçlar (Sadece görünür segmenttekiler)
+    for(let n=CFG.drawDistance; n>0; n--) {
+        let idx = (baseSegment.index + n) % segments.length;
+        let seg = segments[idx];
+        if(seg.tree && seg.scale) {
+             let dist = n * CFG.segmentLength; // Yaklaşık
+             let treeX = seg.screenX + (seg.scale * seg.tree * CFG.roadWidth * canvas.width/2 * 1.5);
+             sprites.push({ type: 'tree', z: dist, x: treeX, y: seg.clipY, s: seg.scale });
         }
     }
 
-    // Rakip Araçları Çiz
-    cars.forEach(c => {
-        let relZ = c.z - player.z;
-        if(relZ < 0) relZ += trackLength;
-        if(relZ < 30000) {
-            let scale = CFG.camD / relZ;
-            let cx = (canvas.width/2) + (scale * (c.x - player.x) * CFG.roadW * canvas.width/2);
-            let cy = (canvas.height/2) - (scale * -CFG.camH * canvas.height/2);
-            drawVehicle(ctx, cx, cy, scale * 300000, c.color);
-        }
+    // Sırala: En uzaktakini önce çiz (Painters Algo)
+    sprites.sort((a,b) => b.z - a.z);
+
+    // Çiz
+    sprites.forEach(sp => {
+        if(sp.type === 'car') drawCarBody(sp.x, sp.y, sp.s * 8000, sp.c);
+        if(sp.type === 'tree') drawTree(sp.x, sp.y, sp.s * 6000);
     });
 
-    // Oyuncu Aracı (Sabit konum, dinamik çizim)
-    drawVehicle(ctx, canvas.width/2, canvas.height - 150, 250, "#0071e3", true);
+    // 4. Player Car (En üstte)
+    drawCarBody(canvas.width/2, canvas.height - 100, 450, {color: '#d63031', mesh: 0}, true);
 }
 
-function finish() {
+// YARDIMCI ÇİZİM FONKSİYONLARI
+function drawCarBody(x, y, w, carObj, isPlayer=false) {
+    let h = w * 0.5;
+    let yPos = y - h; // Tekerlek hizası
+    
+    // Gölge
+    ctx.fillStyle = "rgba(0,0,0,0.4)";
+    ctx.beginPath(); ctx.ellipse(x, yPos + h*0.8, w*0.6, h*0.15, 0, 0, Math.PI*2); ctx.fill();
+    
+    // Alt Gövde
+    ctx.fillStyle = carObj.color;
+    // Yuvarlak hatlar
+    ctx.beginPath();
+    ctx.roundRect(x - w/2, yPos, w, h*0.6, w*0.1);
+    ctx.fill();
+    
+    // Üst Kabin (Cam)
+    ctx.fillStyle = "#111"; // Cam rengi
+    let roofW = w * 0.6;
+    ctx.beginPath();
+    ctx.moveTo(x - roofW/2, yPos);
+    ctx.lineTo(x - roofW/2 + w*0.1, yPos - h*0.5); // Sol direk
+    ctx.lineTo(x + roofW/2 - w*0.1, yPos - h*0.5); // Sağ direk
+    ctx.lineTo(x + roofW/2, yPos);
+    ctx.fill();
+    
+    // Stop Lambaları
+    let lightColor = (isPlayer && (keys['ArrowDown']||keys['KeyS'])) ? "#ff0000" : "#8b0000";
+    ctx.fillStyle = lightColor;
+    ctx.fillRect(x - w*0.4, yPos + h*0.1, w*0.15, h*0.15);
+    ctx.fillRect(x + w*0.25, yPos + h*0.1, w*0.15, h*0.15);
+    
+    // Plaka
+    if(w > 50) {
+        ctx.fillStyle = "white";
+        ctx.fillRect(x - w*0.1, yPos + h*0.3, w*0.2, h*0.1);
+    }
+}
+
+function drawTree(x, y, s) {
+    // Basit Vektörel Ağaç
+    let w = s * 0.5; 
+    let h = s * 1.2;
+    // Gövde
+    ctx.fillStyle = "#5d4037";
+    ctx.fillRect(x - w/4, y - h, w/2, h);
+    // Yapraklar (3 katmanlı)
+    ctx.fillStyle = "#2e7d32";
+    ctx.beginPath(); ctx.moveTo(x - w, y - h*0.3); ctx.lineTo(x, y - h*1.5); ctx.lineTo(x + w, y - h*0.3); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x - w*0.8, y - h*0.8); ctx.lineTo(x, y - h*1.8); ctx.lineTo(x + w*0.8, y - h*0.8); ctx.fill();
+}
+
+function endGame() {
     running = false;
+    document.getElementById('end-screen').classList.remove('hidden');
     let rank = 1;
     cars.forEach(c => { if(c.z > player.z) rank++; });
-    document.getElementById('results').classList.remove('hidden');
-    document.getElementById('rank-text').innerText = rank + ". OLDUN!";
-    document.getElementById('medal-icon').innerText = rank == 1 ? "🥇" : rank <= 3 ? "🥈" : "🥉";
+    document.getElementById('end-title').innerText = rank + ". OLDUNUZ!";
 }
 </script>
 </body>
