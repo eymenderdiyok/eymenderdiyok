@@ -1,87 +1,110 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>Flappy Bird</title>
+    <link href="https://db.onlinewebfonts.com/c/364d81f3f71bc524d2235f8b406e732b?family=Flappy+Bird+Regular" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <style>
-        @font-face {
-            font-family: 'flappybird';
-            src: url('https://db.onlinewebfonts.com/t/88c68837bc28bc89ab74977461994116.ttf') format('truetype');
+        body { 
+            margin: 0; width: 100%; height: 100vh; overflow: hidden; 
+            font-family: "Flappy Bird Regular", sans-serif; 
+            background: #70c5ce; 
         }
-        body { margin: 0; width: 100%; height: 100vh; overflow: hidden; font-family: -apple-system, sans-serif; background: #70c5ce; }
         #Canvas { position: relative; width: 100%; height: 100%; cursor: pointer; }
         
         /* Menü Stili */
         #Menu {
-            position: absolute; inset: 0; background: rgba(112, 197, 206, 1);
+            position: absolute; inset: 0; background: #70c5ce;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 300; font-family: 'flappybird', sans-serif;
+            z-index: 300;
         }
         .mode-btn {
-            width: 200px; padding: 15px; margin: 10px; border: 3px solid #000;
-            border-radius: 10px; font-size: 20px; cursor: pointer; color: white;
-            text-shadow: 1px 1px 0 #000; font-weight: bold;
+            width: 240px; padding: 12px; margin: 10px; border: 4px solid #000;
+            border-radius: 8px; font-size: 28px; cursor: pointer; color: white;
+            font-family: "Flappy Bird Regular", sans-serif;
+            text-shadow: 2px 2px 0 #000; transition: 0.1s;
         }
+        .mode-btn:active { transform: scale(0.95); }
         .easy { background: #2ecc71; }
         .normal { background: #f1c40f; }
         .hard { background: #e74c3c; }
 
         #Birdy {
             width: 40px; height: 30px; position: absolute; top: 50%; left: 20%;
-            z-index: 150; font-size: 30px; display: flex; align-items: center; justify-content: center;
+            z-index: 150; font-size: 35px; display: flex; align-items: center; justify-content: center;
         }
-        .Pipe { position: absolute; top: 0; left: 100%; width: 60px; background: #73bf2e; border: 2px solid #000; z-index: 10; }
-        #Score { position: absolute; top: 20px; width: 100%; text-align: center; font-family: 'flappybird'; font-size: 50px; color: white; text-shadow: 2px 2px 0 #000; z-index: 100; }
-        #GameOver { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #ded895; border: 3px solid #000; padding: 20px; border-radius: 15px; text-align: center; z-index: 200; font-family: 'flappybird'; }
+        .Pipe { position: absolute; top: 0; left: 100%; width: 65px; background: #73bf2e; border: 4px solid #000; z-index: 10; }
+        
+        /* Skor Tabelası */
+        #Score { 
+            position: absolute; top: 40px; width: 100%; text-align: center; 
+            font-size: 80px; color: white; 
+            text-shadow: 4px 4px 0 #000; z-index: 100; pointer-events: none;
+            letter-spacing: 2px;
+        }
+        
+        #GameOver { 
+            display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            background: #ded895; border: 5px solid #000; padding: 40px; border-radius: 15px; 
+            text-align: center; z-index: 400; box-shadow: 0 15px 0 rgba(0,0,0,0.1);
+        }
+        #GameOver h2 { font-size: 50px; margin: 0; color: #fff; text-shadow: 3px 3px 0 #000; }
+        #GameOver p { font-size: 35px; margin: 20px 0; color: #533847; }
+        .restart-btn {
+            background: #e67e22; border: 4px solid #000; color: white; 
+            padding: 10px 30px; border-radius: 8px; cursor: pointer; 
+            font-family: "Flappy Bird Regular", sans-serif; font-size: 25px;
+        }
     </style>
 </head>
 <body>
 
 <div id="Menu">
-    <h1 style="color:white; text-shadow: 3px 3px 0 #000; font-size: 40px;">MOD SEÇ</h1>
-    <button class="mode-btn easy" onclick="initGame('easy')">KOLAY (Geniş)</button>
+    <h1 style="color:white; text-shadow: 5px 5px 0 #000; font-size: 65px; margin-bottom: 20px;">MOD SEÇ</h1>
+    <button class="mode-btn easy" onclick="initGame('easy')">KOLAY</button>
     <button class="mode-btn normal" onclick="initGame('normal')">NORMAL</button>
-    <button class="mode-btn hard" onclick="initGame('hard')">ZOR (Dar)</button>
+    <button class="mode-btn hard" onclick="initGame('hard')">ZOR</button>
 </div>
 
 <div id="Canvas">
     <div id="Score">0</div>
     <div id="Birdy">🐦</div>
+    
     <div id="GameOver">
-        <h2 style="margin:0">EYVAH!</h2>
+        <h2>EYVAH!</h2>
         <p>SKOR: <span id="FinalScore">0</span></p>
-        <button onclick="location.reload()" style="background:#e67e22; border:none; color:white; padding:10px 20px; border-radius:5px; cursor:pointer;">TEKRAR DENE</button>
+        <button class="restart-btn" onclick="location.reload()">TEKRAR DENE</button>
     </div>
 </div>
 
 <script>
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playNote(freq, type, duration) {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(); osc.stop(audioCtx.currentTime + duration);
+        try {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + duration);
+        } catch(e) {}
     }
 
-    let birdY = 50, velocity = 0, gravity = 0.4, score = 0, isLost = false, pipes = [];
+    let birdY = 50, velocity = 0, gravity = 0.52, score = 0, isLost = false, pipes = [];
     let gameLoop, gameStarted = false;
-    
-    // MOD AYARLARI
-    let config = { gap: 35, pipeFrequency: 0.015, speed: 1.2 };
+    let config = { gap: 35, pipeFrequency: 0.015, speed: 1.3 };
 
     function initGame(mode) {
-        if(mode === 'easy') { config.gap = 45; config.pipeFrequency = 0.012; config.speed = 1.0; }
-        if(mode === 'hard') { config.gap = 25; config.pipeFrequency = 0.022; config.speed = 1.8; }
+        if(mode === 'easy') { config.gap = 48; config.pipeFrequency = 0.012; config.speed = 1.1; }
+        if(mode === 'hard') { config.gap = 28; config.pipeFrequency = 0.025; config.speed = 2.0; }
         
-        $('#Menu').fadeOut();
+        $('#Menu').fadeOut(300);
         gameStarted = true;
-        startGame();
+        setTimeout(startGame, 400);
     }
 
     function startGame() {
@@ -89,17 +112,16 @@
             if (isLost) return;
             velocity += gravity;
             birdY += velocity;
-            $('#Birdy').css({ 'top': birdY + '%', 'transform': `rotate(${Math.min(velocity * 4, 90)}deg)` });
-
+            $('#Birdy').css({ 'top': birdY + '%', 'transform': `rotate(${Math.min(velocity * 3, 90)}deg)` });
             if (Math.random() < config.pipeFrequency) createPipe();
             movePipes();
-
-            if (birdY > 95 || birdY < 0) endGame();
+            if (birdY > 96 || birdY < -5) endGame();
         }, 30);
     }
 
     function createPipe() {
-        let topHeight = Math.random() * (100 - config.gap - 20) + 10;
+        let minH = 10;
+        let topHeight = Math.random() * (100 - config.gap - (minH * 2)) + minH;
         let pipeId = Date.now();
         $('<div/>').addClass('Pipe').attr('id', 'top'+pipeId).css({ height: topHeight + '%', left: '100%' }).appendTo('#Canvas');
         $('<div/>').addClass('Pipe').attr('id', 'bot'+pipeId).css({ height: (100 - topHeight - config.gap) + '%', top: (topHeight + config.gap) + '%', left: '100%' }).appendTo('#Canvas');
@@ -110,17 +132,14 @@
         pipes.forEach((p, i) => {
             p.left -= config.speed;
             $(`#top${p.id}, #bot${p.id}`).css('left', p.left + '%');
-
             if (!p.scored && p.left < 20) {
                 p.scored = true; score++; $('#Score').text(score);
                 playNote(880, 'sine', 0.1);
             }
-
             if (p.left > 15 && p.left < 25) {
-                if (birdY < p.topH || birdY > (p.topH + config.gap - 5)) endGame();
+                if (birdY < p.topH || birdY > (p.topH + config.gap - 4)) endGame();
             }
-
-            if (p.left < -15) {
+            if (p.left < -20) {
                 $(`#top${p.id}, #bot${p.id}`).remove();
                 pipes.splice(i, 1);
             }
@@ -130,20 +149,23 @@
     function jump() {
         if (!gameStarted || isLost) return;
         if (audioCtx.state === 'suspended') audioCtx.resume();
-        velocity = -7;
+        velocity = -5.0; // Zıplama gücü düşürüldü
         playNote(440, 'square', 0.05);
     }
 
     function endGame() {
+        if (isLost) return;
         isLost = true;
         clearInterval(gameLoop);
-        playNote(110, 'sawtooth', 0.3);
+        playNote(150, 'sawtooth', 0.4);
         $('#FinalScore').text(score);
-        $('#GameOver').fadeIn();
+        $('#GameOver').fadeIn(400);
     }
 
-    $(document).on('mousedown keydown', (e) => {
+    $(document).on('mousedown touchstart keydown', (e) => {
         if (e.type === 'keydown' && e.which !== 32) return;
+        if (e.target.tagName === 'BUTTON') return;
+        e.preventDefault();
         jump();
     });
 </script>
