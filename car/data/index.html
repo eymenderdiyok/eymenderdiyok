@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>MODERN CAR RACER | 3D EDITION</title>
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #72d7ee; overflow: hidden; font-family: sans-serif; }
+        canvas { display: block; width: 100%; height: 100%; }
+        #ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; color: white; text-shadow: 2px 2px #000; }
+        .menu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: all; }
+        .btn { background: #ff4757; border: none; color: white; padding: 20px 40px; font-size: 1.5rem; cursor: pointer; border-radius: 10px; }
+        #hud { padding: 20px; font-size: 1.5rem; display: flex; justify-content: space-between; }
+        .speed { position: absolute; bottom: 30px; right: 30px; font-size: 3rem; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <canvas id="gameCanvas"></canvas>
+    
+    <div id="ui">
+        <div id="menu" class="menu">
+            <h1 style="font-size: 4rem;">MODERN RACER</h1>
+            <button class="btn" onclick="startGame()">YARIŞA BAŞLA</button>
+        </div>
+        <div id="hud" class="hidden">
+            <div id="pos">SIRALAMA: 1 / 6</div>
+            <div id="lap">TUR: 1 / 3</div>
+        </div>
+        <div id="speed" class="speed hidden">0 KM/H</div>
+    </div>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+const CFG = {
+    fps: 60, roadW: 2000, segL: 200, camH: 1000, camD: 0.84,
+    drawD: 200, maxS: 22000, accel: 7500, brake: -10000, decel: -4000
+};
+
+let player, segments = [], cars = [], running = false, lastTime = 0;
+let keys = {};
+
+window.onkeydown = e => keys[e.code] = true;
+window.onkeyup = e => keys[e.code] = false;
+
+function startGame() {
+    document.getElementById('menu').classList.add('hidden');
+    document.getElementById('hud').classList.remove('hidden');
+    document.getElementById('speed').classList.remove('hidden');
+    init();
+}
+
+function init() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    player = { x: 0, z: 0, speed: 0, lap: 1 };
+    segments = [];
+
+    // Yol Oluşturma
+    for (let i = 0; i < 1000; i++) {
+        segments.push({
+            index: i,
+            p1: { world: { z: i * CFG.segL }, screen: {} },
+            p2: { world: { z: (i + 1) * CFG.segL }, screen: {} },
+            curve: (i > 100 && i < 200) ? 2 : (i > 400 && i < 600) ? -3 : 0,
+            color: Math.floor(i / 3) % 2 ? '#444' : '#4a4a4a',
+            tree: (i % 5 === 0) ? (Math.random() > 0.5 ? 1.5 : -1.5) : 0 // Yol kenarı ağaçları
+        });
+    }
+
+    // Rakip Araçlar
+    cars = [];
+    for (let i = 0; i < 5; i++) {
+        cars.push({
+            x: (i % 2 === 0 ? 0.5 : -0.5),
+            z: (i + 1) * 3000,
+            speed: 10000 + Math.random() * 5000,
+            color: `hsl(${i * 60}, 70%, 50%)`
+        });
+    }
+
+    running = true;
+    requestAnimationFrame(loop);
+}
+
+function project(p, camX, camY, camZ) {
+    p.camera = { x: (p.world.x || 0) - camX, y: (p.world.y || 0) - camY, z: p.world.z - camZ };
+    p.screen.scale = CFG.camD / p.camera.z;
+    p.screen.x = (canvas.width / 2) + (p.screen.scale * p.camera.x * canvas.width / 2);
+    p.screen.y = (canvas.height / 2) - (p.screen.scale * p.camera.y * canvas.height / 2);
+    p.screen.w = (p.screen.scale * CFG.roadW * canvas.width / 2);
+}
+
+function loop(time) {
+    if (!running) return;
+    let dt = (time - lastTime) / 1000;
+    if (dt > 0.1) dt = 0.1;
+    lastTime = time;
+
+    update(dt);
+    render();
+    requestAnimationFrame(loop);
+}
+
+function update(dt) {
+    const trackL = segments.length * CFG.segL;
+
+    // Hızlanma / Fren
+    if (keys['ArrowUp'] || keys['KeyW']) player.speed += CFG.accel * dt;
+    else if (keys['ArrowDown'] || keys['KeyS']) player.speed += CFG.brake * dt;
+    else player.speed += CFG.decel * dt;
+
+    // Görünmez Bariyer ( player.x limitli: -0.85 ile 0.85 arası )
+    if (keys['ArrowLeft'] || keys['KeyA']) player.x = Math.max(-0.85, player.x - 1.5 * dt);
+    if (keys['ArrowRight'] || keys['KeyD']) player.x = Math.min(0.85, player.x + 1.5 * dt);
+
+    player.speed = Math.max(0, Math.min(player.speed, CFG.maxS));
+    player.z += player.speed * dt;
+
+    if (player.z >= trackL) { player.z -= trackL; player.lap++; }
+
+    // Rakip Hareketleri
+    cars.forEach(car => {
+        car.z += car.speed * dt;
+        if (car.z >= trackL) car.z -= trackL;
+    });
+
+    document.getElementById('speed').innerText = Math.round(player.speed / 100) + " KM/H";
+}
+
+function render() {
+    // Arka Plan (Gökyüzü ve Çimen)
+    ctx.fillStyle = '#72d7ee'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#39a032'; ctx.fillRect(0, canvas.height / 2, canvas.width, canvas.height / 2);
+
+    let base = Math.floor(player.z / CFG.segL);
+    let x = 0, dx = 0;
+
+    for (let n = 0; n < CFG.drawD; n++) {
+        let s = segments[(base + n) % segments.length];
+        let loop = s.index < base;
+
+        project(s.p1, player.x * CFG.roadW - x, CFG.camH, player.z - (loop ? segments.length * CFG.segL : 0));
+        project(s.p2, player.x * CFG.roadW - x - dx, CFG.camH, player.z - (loop ? segments.length * CFG.segL : 0));
+
+        x += dx; dx += s.curve;
+        if (s.p1.camera.z <= 0) continue;
+
+        // Yol Çizimi
+        ctx.fillStyle = s.color;
+        ctx.beginPath();
+        ctx.moveTo(s.p1.screen.x - s.p1.screen.w, s.p1.screen.y);
+        ctx.lineTo(s.p1.screen.x + s.p1.screen.w, s.p1.screen.y);
+        ctx.lineTo(s.p2.screen.x + s.p2.screen.w, segY(s.p2));
+        ctx.lineTo(s.p2.screen.x - s.p2.screen.w, segY(s.p2));
+        ctx.fill();
+
+        // Şeritler
+        if (Math.floor(s.index / 2) % 2 === 0) {
+            ctx.fillStyle = "white";
+            ctx.fillRect(s.p1.screen.x - 5, s.p1.screen.y, 10, s.p2.screen.y - s.p1.screen.y);
+        }
+
+        // Ağaçlar
+        if (s.tree) {
+            let treeX = s.p1.screen.x + (s.tree * s.p1.screen.w);
+            ctx.fillStyle = "#4a2d18"; ctx.fillRect(treeX - 10, s.p1.screen.y - 40, 20, 40); // Gövde
+            ctx.fillStyle = "green"; ctx.beginPath(); ctx.arc(treeX, s.p1.screen.y - 60, 30, 0, Math.PI*2); ctx.fill(); // Yapraklar
+        }
+    }
+
+    // Rakip Araçları Çiz
+    cars.forEach(car => {
+        let carSeg = segments[Math.floor(car.z / CFG.segL) % segments.length];
+        if (car.z > player.z && car.z < player.z + (CFG.drawD * CFG.segL)) {
+            let scale = CFG.camD / (car.z - player.z);
+            let carX = (canvas.width/2) + (scale * (car.x - player.x) * CFG.roadW * canvas.width/2);
+            let carY = (canvas.height/2) - (scale * -CFG.camH * canvas.height/2);
+            let carW = scale * 1000 * canvas.width/2;
+            
+            ctx.fillStyle = car.color;
+            ctx.fillRect(carX - carW/2, carY - carW/4, carW, carW/2);
+        }
+    });
+
+    // Oyuncu Aracı
+    ctx.fillStyle = "blue";
+    ctx.fillRect(canvas.width / 2 - 60, canvas.height - 120, 120, 50);
+    ctx.fillStyle = "black"; // Tekerlekler
+    ctx.fillRect(canvas.width / 2 - 70, canvas.height - 110, 20, 30);
+    ctx.fillRect(canvas.width / 2 + 50, canvas.height - 110, 20, 30);
+}
+
+function segY(p) { return p.screen.y; }
+
+window.onresize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+</script>
+</body>
+</html>
