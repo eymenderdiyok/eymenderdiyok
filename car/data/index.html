@@ -38,7 +38,6 @@
         }
     </style>
 
-    <!-- Poki stub (oyun Poki bekliyorsa crash olmasın diye) -->
     <script>
         window.PokiSDK = {
             init: () => Promise.resolve(true),
@@ -63,10 +62,8 @@
     </canvas>
 </div>
 
-<!-- IMPORTANT: yollar car/data/ içindir -->
-<script src="./jquery-3.4.1.min.js"></script>
-<script src="./data.js"></script>
-<script src="./c2runtime.js"></script>
+<script src="/car/data/jquery-3.4.1.min.js"></script>
+<script src="/car/data/c2runtime.js"></script>
 
 <script>
     // Canvas otomatik resize
@@ -80,6 +77,7 @@
 
     // Construct 2 runtime başlat
     jQuery(document).ready(function () {
+        // data.js dosyasını Script olarak değil, veri olarak yüklemek için c2runtime bunu halleder
         cr_createRuntime("c2canvas");
         resizeCanvas();
     });
