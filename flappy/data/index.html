@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Flappy Bird</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #70c5ce; font-family: 'SF Pro Display', sans-serif; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script>
+const cvs = document.getElementById("canvas");
+const ctx = cvs.getContext("2d");
+
+cvs.width = window.innerWidth;
+cvs.height = window.innerHeight;
+
+let bird = { x: 50, y: 150, w: 34, h: 24, gravity: 0.15, velocity: 0, jump: 3.5 };
+let pipes = [];
+let score = 0;
+let frame = 0;
+
+function drawBird() {
+    ctx.fillStyle = "#f7dc6f";
+    ctx.fillRect(bird.x, bird.y, bird.w, bird.h);
+}
+
+function drawPipe(p) {
+    ctx.fillStyle = "#2ecc71";
+    ctx.fillRect(p.x, 0, 50, p.top);
+    ctx.fillRect(p.x, cvs.height - p.bottom, 50, p.bottom);
+}
+
+function update() {
+    bird.velocity += bird.gravity;
+    bird.y += bird.velocity;
+
+    if (frame % 100 == 0) {
+        let top = Math.random() * (cvs.height / 2);
+        pipes.push({ x: cvs.width, top: top, bottom: cvs.height - top - 120 });
+    }
+
+    pipes.forEach((p, i) => {
+        p.x -= 2;
+        if (p.x + 50 < 0) { pipes.splice(i, 1); score++; }
+        
+        // Çarpışma Kontrolü
+        if (bird.x + bird.w > p.x && bird.x < p.x + 50 && (bird.y < p.top || bird.y + bird.h > cvs.height - p.bottom)) {
+            location.reload();
+        }
+    });
+
+    if (bird.y + bird.h > cvs.height || bird.y < 0) location.reload();
+}
+
+function draw() {
+    ctx.fillStyle = "#70c5ce";
+    ctx.fillRect(0, 0, cvs.width, cvs.height);
+    drawBird();
+    pipes.forEach(drawPipe);
+    ctx.fillStyle = "white";
+    ctx.font = "30px Arial";
+    ctx.fillText(score, cvs.width/2, 50);
+    update();
+    frame++;
+    requestAnimationFrame(draw);
+}
+
+window.addEventListener("keydown", () => { bird.velocity = -bird.jump; });
+window.addEventListener("mousedown", () => { bird.velocity = -bird.jump; });
+draw();
+</script>
+</body>
+</html>
