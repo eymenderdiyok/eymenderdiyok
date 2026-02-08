@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>Eggy Car</title>
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            background: #000;
+            color: #fff;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        #c2canvasdiv {
+            width: 100%;
+            height: 100%;
+        }
+
+        canvas {
+            display: block;
+            margin: auto;
+            touch-action: none;
+        }
+    </style>
+
+    <!-- Poki stub (oyun Poki bekliyorsa crash olmasın diye) -->
+    <script>
+        window.PokiSDK = {
+            init: () => Promise.resolve(true),
+            gameLoadingStart: () => {},
+            gameLoadingFinished: () => {},
+            gameLoadingProgress: () => {},
+            happyTime: () => {},
+            commercialBreak: () => Promise.resolve(true),
+            rewardedBreak: () => Promise.resolve(true),
+            shareableURL: () => {},
+            getURLParam: () => null,
+            setDebug: () => {}
+        };
+    </script>
+</head>
+
+<body>
+
+<div id="c2canvasdiv">
+    <canvas id="c2canvas" width="960" height="540">
+        <h1>Tarayıcınız HTML5 desteklemiyor.</h1>
+    </canvas>
+</div>
+
+<!-- IMPORTANT: yollar car/data/ içindir -->
+<script src="./jquery-3.4.1.min.js"></script>
+<script src="./data.js"></script>
+<script src="./c2runtime.js"></script>
+
+<script>
+    // Canvas otomatik resize
+    function resizeCanvas() {
+        if (typeof cr_sizeCanvas === "function") {
+            cr_sizeCanvas(window.innerWidth, window.innerHeight);
+        }
+    }
+
+    window.addEventListener("resize", resizeCanvas);
+
+    // Construct 2 runtime başlat
+    jQuery(document).ready(function () {
+        cr_createRuntime("c2canvas");
+        resizeCanvas();
+    });
+
+    // Sekme değişince pause olayı
+    function onVisibilityChange() {
+        if (document.hidden) {
+            cr_setSuspended(true);
+        } else {
+            cr_setSuspended(false);
+        }
+    }
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+</script>
+
+</body>
+</html>
