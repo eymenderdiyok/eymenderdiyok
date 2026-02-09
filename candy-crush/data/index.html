@@ -1,38 +1,237 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-  <head>
-    <meta charset="utf-8">
-    <title>Talha - Candy Crush</title>
-
-    <!-- 👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻-->
-    <!-- Also uploaded the demo of this code in a gif : https://c.tenor.com/x8v1oNUOmg4AAAAd/tenor.gif-->
-    <!-- 👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻-->
-
-    <!-- 👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻-->
-    <!-- More html-css-js Games Calculators Games Cards Elements Projects on https://www.github.com/he-is-talha --> 
-    <!-- 👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻-->
-
-    <link rel="icon" href="https://i.ibb.co/M6KTWnf/pic.jpg">
-
-    <link rel="stylesheet" href="style.css">
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Candy Crush Game</title>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400&display=swap" rel="stylesheet">
-    <script src="script.js" charset="utf-8"></script>
-  </head>
-  <body>
-    <!-- Mode Selection Screen -->
+    <style>
+        /* CSS AYARLARI */
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            font-family: 'Montserrat', sans-serif;
+            overflow: hidden;
+        }
+
+        .grid {
+            width: 400px;
+            height: 400px;
+            display: flex;
+            flex-wrap: wrap;
+            background-color: rgba(255, 255, 255, 0.5);
+            padding: 5px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .grid div {
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+        }
+
+        .scoreBoard {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        h1 { margin: 0; font-size: 48px; color: #333; }
+        h3 { margin: 0; text-transform: uppercase; letter-spacing: 2px; color: #666; }
+
+        #modeSelection {
+            position: absolute;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            z-index: 100;
+            text-align: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            background: #0071e3;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        #timer { font-size: 20px; font-weight: bold; color: #e74c3c; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
     <div id="modeSelection">
-      <h2>Choose Game Mode</h2>
-      <button id="endlessMode">Endless Mode</button>
-      <button id="timedMode">Timed Mode</button>
+        <h2>Mod Seç</h2>
+        <button id="endlessMode">Sonsuz Mod</button>
+        <button id="timedMode">Süreli Mod</button>
     </div>
-    <!-- Scoreboard with Timer and Change Mode Button -->
+
     <div class="scoreBoard">
-      <h3>score</h3>
-      <h1 id="score">0</h1>
-      <div id="timer"></div>
-      <button id="changeMode">Change Mode</button>
+        <h3>SKOR</h3>
+        <h1 id="score">0</h1>
+        <div id="timer"></div>
+        <button id="changeMode" style="display:none">Mod Değiştir</button>
     </div>
-    <!-- Game Grid -->
+
     <div class="grid"></div>
-  </body>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const grid = document.querySelector('.grid');
+            const scoreDisplay = document.getElementById('score');
+            const width = 8;
+            const squares = [];
+            let score = 0;
+
+            const candyColors = [
+                'url(https://raw.githubusercontent.com/Arun6-6/candy-crush-clone/master/images/red-candy.png)',
+                'url(https://raw.githubusercontent.com/Arun6-6/candy-crush-clone/master/images/yellow-candy.png)',
+                'url(https://raw.githubusercontent.com/Arun6-6/candy-crush-clone/master/images/orange-candy.png)',
+                'url(https://raw.githubusercontent.com/Arun6-6/candy-crush-clone/master/images/purple-candy.png)',
+                'url(https://raw.githubusercontent.com/Arun6-6/candy-crush-clone/master/images/green-candy.png)',
+                'url(https://raw.githubusercontent.com/Arun6-6/candy-crush-clone/master/images/blue-candy.png)'
+            ];
+
+            // Tabloyu Oluştur
+            function createBoard() {
+                for (let i = 0; i < width * width; i++) {
+                    const square = document.createElement('div');
+                    square.setAttribute('draggable', true);
+                    square.setAttribute('id', i);
+                    let randomColor = Math.floor(Math.random() * candyColors.length);
+                    square.style.backgroundImage = candyColors[randomColor];
+                    square.style.backgroundSize = "contain";
+                    grid.appendChild(square);
+                    squares.push(square);
+                }
+            }
+            createBoard();
+
+            // Sürükle Bırak Mantığı
+            let colorBeingDragged, colorBeingReplaced, squareIdBeingDragged, squareIdBeingReplaced;
+
+            squares.forEach(square => square.addEventListener('dragstart', dragStart));
+            squares.forEach(square => square.addEventListener('dragend', dragEnd));
+            squares.forEach(square => square.addEventListener('dragover', dragOver));
+            squares.forEach(square => square.addEventListener('dragenter', dragEnter));
+            squares.forEach(square => square.addEventListener('dragleave', dragLeave));
+            squares.forEach(square => square.addEventListener('drop', dragDrop));
+
+            function dragStart() {
+                colorBeingDragged = this.style.backgroundImage;
+                squareIdBeingDragged = parseInt(this.id);
+            }
+            function dragOver(e) { e.preventDefault(); }
+            function dragEnter(e) { e.preventDefault(); }
+            function dragLeave() {}
+            function dragDrop() {
+                colorBeingReplaced = this.style.backgroundImage;
+                squareIdBeingReplaced = parseInt(this.id);
+                this.style.backgroundImage = colorBeingDragged;
+                squares[squareIdBeingDragged].style.backgroundImage = colorBeingReplaced;
+            }
+
+            function dragEnd() {
+                let validMoves = [
+                    squareIdBeingDragged - 1,
+                    squareIdBeingDragged - width,
+                    squareIdBeingDragged + 1,
+                    squareIdBeingDragged + width
+                ];
+                let validMove = validMoves.includes(squareIdBeingReplaced);
+
+                if (squareIdBeingReplaced && validMove) {
+                    squareIdBeingReplaced = null;
+                } else if (squareIdBeingReplaced && !validMove) {
+                    squares[squareIdBeingReplaced].style.backgroundImage = colorBeingReplaced;
+                    squares[squareIdBeingDragged].style.backgroundImage = colorBeingDragged;
+                } else squares[squareIdBeingDragged].style.backgroundImage = colorBeingDragged;
+            }
+
+            // Eşleşmeleri kontrol et
+            function checkRowForThree() {
+                for (i = 0; i < 61; i++) {
+                    let rowOfThree = [i, i + 1, i + 2];
+                    let decidedColor = squares[i].style.backgroundImage;
+                    const isBlank = squares[i].style.backgroundImage === '';
+                    const notValid = [6, 7, 14, 15, 22, 23, 30, 31, 38, 39, 46, 47, 54, 55];
+                    if (notValid.includes(i)) continue;
+
+                    if (rowOfThree.every(index => squares[index].style.backgroundImage === decidedColor && !isBlank)) {
+                        score += 3;
+                        scoreDisplay.innerHTML = score;
+                        rowOfThree.forEach(index => { squares[index].style.backgroundImage = ''; });
+                    }
+                }
+            }
+
+            function checkColumnForThree() {
+                for (i = 0; i < 47; i++) {
+                    let columnOfThree = [i, i + width, i + width * 2];
+                    let decidedColor = squares[i].style.backgroundImage;
+                    const isBlank = squares[i].style.backgroundImage === '';
+
+                    if (columnOfThree.every(index => squares[index].style.backgroundImage === decidedColor && !isBlank)) {
+                        score += 3;
+                        scoreDisplay.innerHTML = score;
+                        columnOfThree.forEach(index => { squares[index].style.backgroundImage = ''; });
+                    }
+                }
+            }
+
+            function moveIntoSquareBelow() {
+                for (i = 0; i < 55; i++) {
+                    if (squares[i + width].style.backgroundImage === '') {
+                        squares[i + width].style.backgroundImage = squares[i].style.backgroundImage;
+                        squares[i].style.backgroundImage = '';
+                        const firstRow = [0, 1, 2, 3, 4, 5, 6, 7];
+                        const isFirstRow = firstRow.includes(i);
+                        if (isFirstRow && squares[i].style.backgroundImage === '') {
+                            let randomColor = Math.floor(Math.random() * candyColors.length);
+                            squares[i].style.backgroundImage = candyColors[randomColor];
+                        }
+                    }
+                }
+            }
+
+            window.setInterval(function() {
+                checkRowForThree();
+                checkColumnForThree();
+                moveIntoSquareBelow();
+            }, 100);
+
+            // Mod Seçimi
+            document.getElementById('endlessMode').onclick = () => {
+                document.getElementById('modeSelection').style.display = 'none';
+                document.getElementById('changeMode').style.display = 'block';
+            };
+
+            document.getElementById('timedMode').onclick = () => {
+                document.getElementById('modeSelection').style.display = 'none';
+                document.getElementById('changeMode').style.display = 'block';
+                let timeLeft = 60;
+                let timerId = setInterval(() => {
+                    if(timeLeft <= 0) {
+                        clearInterval(timerId);
+                        alert("Süre Doldu! Skorun: " + score);
+                        location.reload();
+                    }
+                    document.getElementById('timer').innerText = "Süre: " + timeLeft;
+                    timeLeft -= 1;
+                }, 1000);
+            };
+
+            document.getElementById('changeMode').onclick = () => location.reload();
+        });
+    </script>
+</body>
 </html>
