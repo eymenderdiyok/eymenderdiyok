@@ -1,252 +1,322 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="page-title">eymenderdiyok.com.tr</title>
-    
-    <script src="https://www.google.com/recaptcha/api.js?render=6Lc4w2MsAAAAAOCO0eGxoKRbC_c9vGp3TPSsG3zf"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="page-title">eymenderdiyok.com.tr</title>
 
-    <style>
-        :root {
-            --apple-blue: #0071e3;
-            --apple-bg: #f5f5f7;
-            --success-green: #32d74b;
-            --glass: rgba(255, 255, 255, 0.7);
-        }
+<script src="https://www.google.com/recaptcha/api.js?render=6Lc4w2MsAAAAAOCO0eGxoKRbC_c9vGp3TPSsG3zf"></script>
 
-        body {
-            margin: 0; padding: 0;
-            background-color: #ffffff;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-            overflow-x: hidden;
-        }
+<style>
+:root {
+    --apple-blue:#0071e3;
+    --apple-bg:#f5f5f7;
+    --success-green:#32d74b;
+    --danger-red:#ff3b30;
+    --glass:rgba(255,255,255,0.7);
+}
 
-        /* GİRİŞ SİSTEMİ */
-        #captcha-gate {
-            position: fixed; inset: 0;
-            background: #ffffff;
-            z-index: 9999;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
+body{
+    margin:0;
+    padding:0;
+    background-color:#ffffff;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;
+    overflow-x:hidden;
+}
 
-        #overlay-content {
-            position: fixed; inset: 0;
-            display: none; flex-direction: column;
-            align-items: center; justify-content: center;
-            z-index: 10000; color: white; opacity: 0;
-            transition: opacity 0.5s ease;
-            pointer-events: none;
-        }
+#captcha-gate{
+    position:fixed;
+    inset:0;
+    background:#ffffff;
+    z-index:9999;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+}
 
-        .domain-label {
-            font-size: clamp(32px, 8vw, 56px);
-            font-weight: 700; color: #1d1d1f; margin-bottom: 40px;
-            transition: opacity 0.4s;
-        }
+#overlay-content{
+    position:fixed;
+    inset:0;
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    z-index:10000;
+    color:white;
+    opacity:0;
+    transition:opacity .5s ease;
+    pointer-events:none;
+}
 
-        #status-circle {
-            width: 60px; height: 60px;
-            border: 5px solid #f2f2f2;
-            border-top: 5px solid var(--apple-blue);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            transition: all 0.8s cubic-bezier(0.65, 0, 0.35, 1);
-        }
+.domain-label{
+    font-size:clamp(32px,8vw,56px);
+    font-weight:700;
+    color:#1d1d1f;
+    margin-bottom:40px;
+    transition:opacity .4s;
+}
 
-        @keyframes spin { 100% { transform: rotate(360deg); } }
+#status-circle{
+    width:60px;
+    height:60px;
+    border:5px solid #f2f2f2;
+    border-top:5px solid var(--apple-blue);
+    border-radius:50%;
+    animation:spin .8s linear infinite;
+    transition:all .8s cubic-bezier(.65,0,.35,1);
+}
 
-        .expand-to-screen {
-            animation: none !important;
-            background-color: var(--success-green) !important;
-            border: none !important;
-            transform: scale(100);
-        }
+@keyframes spin{100%{transform:rotate(360deg);}}
 
-        #final-check {
-            width: 100px; height: 100px;
-            fill: none; stroke: white; stroke-width: 5;
-            stroke-linecap: round; stroke-linejoin: round;
-            stroke-dasharray: 100; stroke-dashoffset: 100;
-            transition: stroke-dashoffset 0.6s ease 0.2s;
-        }
+.expand-to-screen{
+    animation:none!important;
+    border:none!important;
+    transform:scale(100);
+}
 
-        .continue-btn {
-            background: white; color: var(--success-green);
-            border: none; padding: 16px 45px; border-radius: 35px;
-            font-size: 18px; font-weight: 700; cursor: pointer;
-            margin-top: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-        }
+#final-check,
+#final-cross{
+    width:100px;
+    height:100px;
+    fill:none;
+    stroke:white;
+    stroke-width:5;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    stroke-dasharray:100;
+    stroke-dashoffset:100;
+    transition:stroke-dashoffset .6s ease .2s;
+}
 
-        /* ANA SİTE VE OYUNLAR */
-        #main-site {
-            opacity: 0; transform: scale(1.05);
-            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
-            display: none; width: 100%; flex-direction: column; align-items: center;
-            position: relative;
-            z-index: 5;
-        }
+.continue-btn{
+    background:white;
+    color:var(--success-green);
+    border:none;
+    padding:16px 45px;
+    border-radius:35px;
+    font-size:18px;
+    font-weight:700;
+    cursor:pointer;
+    margin-top:30px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.15);
+}
 
-        .navbar { width: 100%; max-width: 1000px; display: flex; justify-content: space-between; align-items: center; padding: 30px 20px; box-sizing: border-box; }
-        
-        .container { 
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 25px; 
-            width: 92%; 
-            max-width: 900px; 
-            padding: 40px 0; 
-        }
+#main-site{
+    opacity:0;
+    transform:scale(1.05);
+    transition:all 1s cubic-bezier(.16,1,.3,1);
+    display:none;
+    width:100%;
+    flex-direction:column;
+    align-items:center;
+    position:relative;
+    z-index:5;
+}
 
-        .game-card { 
-            text-decoration: none; 
-            height: 200px; 
-            border-radius: 35px; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            transition: 0.4s; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-            position: relative;
-            z-index: 10;
-        }
-        .game-card:hover { transform: scale(1.02) translateY(-5px); }
+.navbar{
+    width:100%;
+    max-width:1000px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:30px 20px;
+    box-sizing:border-box;
+}
 
-        /* Oyun Renkleri */
-        .aswc { background: linear-gradient(150deg, #32d74b 0%, #28cd41 100%); }
-        .cubes { background: linear-gradient(150deg, #5e5ce6 0%, #5856d6 100%); }
-        .paper { background: linear-gradient(150deg, #ff9f0a 0%, #ff3b30 100%); }
-        .game-2048 { background: linear-gradient(150deg, #edc22e 0%, #f2b179 100%); }
-        .flappy { background: linear-gradient(150deg, #4fc3f7 0%, #29b6f6 100%); }
-        .eggy-car { background: linear-gradient(150deg, #FFF176 0%, #FFCA28 50%, #FF8F00 100%); }
-            
+.container{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:25px;
+    width:92%;
+    max-width:900px;
+    padding:40px 0;
+}
 
-        .emoji { font-size: 60px; margin-bottom: 12px; }
-        .game-title { color: white; font-size: 20px; font-weight: 700; margin: 0; }
+.game-card{
+    text-decoration:none;
+    height:200px;
+    border-radius:35px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    transition:.4s;
+    box-shadow:0 20px 40px rgba(0,0,0,0.08);
+    position:relative;
+    z-index:10;
+}
+.game-card:hover{transform:scale(1.02) translateY(-5px);}
 
-        .grecaptcha-badge { visibility: hidden; }
-        
-        @media (max-width: 650px) { 
-            .container { grid-template-columns: 1fr; } 
-        }
-    </style>
+.aswc{background:linear-gradient(150deg,#32d74b 0%,#28cd41 100%);}
+.cubes{background:linear-gradient(150deg,#5e5ce6 0%,#5856d6 100%);}
+.paper{background:linear-gradient(150deg,#ff9f0a 0%,#ff3b30 100%);}
+.game-2048{background:linear-gradient(150deg,#edc22e 0%,#f2b179 100%);}
+.flappy{background:linear-gradient(150deg,#4fc3f7 0%,#29b6f6 100%);}
+.eggy-car{background:linear-gradient(150deg,#FFF176 0%,#FFCA28 50%,#FF8F00 100%);}
+
+.emoji{font-size:60px;margin-bottom:12px;}
+.game-title{color:white;font-size:20px;font-weight:700;margin:0;}
+
+.grecaptcha-badge{visibility:hidden;}
+
+@media(max-width:650px){
+.container{grid-template-columns:1fr;}
+}
+</style>
 </head>
+
 <body>
 
-    <div id="captcha-gate">
-        <h1 id="domain-label" class="domain-label">eymenderdiyok.com.tr</h1>
-        <div id="status-circle"></div>
-        <p id="status-text" style="font-size: 15px; color: #86868b; margin-top: 20px;">Güvenlik taranıyor...</p>
-    </div>
+<div id="captcha-gate">
+<h1 id="domain-label" class="domain-label">eymenderdiyok.com.tr</h1>
+<div id="status-circle"></div>
+<p id="status-text" style="font-size:15px;color:#86868b;margin-top:20px;">Güvenlik taranıyor...</p>
+</div>
 
-    <div id="overlay-content">
-        <svg id="final-check" viewBox="0 0 52 52">
-            <path d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
-        </svg>
-        <h2 style="font-size: 28px; margin-top: 10px;">Erişim Onaylandı</h2>
-        <button class="continue-btn" onclick="enterSite()">Devam Et</button>
-    </div>
+<div id="overlay-content">
+<svg id="final-check" viewBox="0 0 52 52">
+<path d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+</svg>
 
-    <div id="main-site">
-        <nav class="navbar">
-            <div style="width: 48px; height: 48px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(0,0,0,0.06);">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="#1d1d1f"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-            </div>
-            <h1 style="font-size: 24px; font-weight: 700; color: #1d1d1f;">Eymen Derdiyok Games</h1>
-            <div style="background: var(--glass); padding: 8px 18px; border-radius: 20px; font-size: 14px; font-weight: 600;">Premium</div>
-        </nav>
+<svg id="final-cross" viewBox="0 0 52 52" style="display:none;">
+<path d="M16 16 L36 36 M36 16 L16 36"/>
+</svg>
 
-        <div class="container">
-            <a href="/aswc/oyna.html" class="game-card aswc">
-                <div class="emoji">⚽️</div>
-                <h2 class="game-title">A Small World Cup</h2>
-            </a>
+<h2 id="result-title" style="font-size:28px;margin-top:10px;">Erişim Onaylandı</h2>
+<button id="result-btn" class="continue-btn" onclick="enterSite()">Devam Et</button>
+</div>
 
-            <a href="/cubes/oyna.html" class="game-card cubes">
-                <div class="emoji">🧊</div>
-                <h2 class="game-title">Cubes 2048.io</h2>
-            </a>
+<div id="main-site">
+<nav class="navbar">
+<div style="width:48px;height:48px;background:white;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 20px rgba(0,0,0,0.06);">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="#1d1d1f"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+</div>
+<h1 style="font-size:24px;font-weight:700;color:#1d1d1f;">Eymen Derdiyok Games</h1>
+<div style="background:var(--glass);padding:8px 18px;border-radius:20px;font-size:14px;font-weight:600;">Premium</div>
+</nav>
 
-            <a href="/paper/oyna.html" class="game-card paper">
-                <div class="emoji">📝</div>
-                <h2 class="game-title">Paper.io</h2>
-            </a>
+<div class="container">
+<a href="/aswc/oyna.html" class="game-card aswc"><div class="emoji">⚽️</div><h2 class="game-title">A Small World Cup</h2></a>
+<a href="/cubes/oyna.html" class="game-card cubes"><div class="emoji">🧊</div><h2 class="game-title">Cubes 2048.io</h2></a>
+<a href="/paper/oyna.html" class="game-card paper"><div class="emoji">📝</div><h2 class="game-title">Paper.io</h2></a>
+<a href="/2048/oyna.html" class="game-card game-2048"><div class="emoji">🔢</div><h2 class="game-title">2048</h2></a>
+<a href="/flappy/oyna.html" class="game-card flappy"><div class="emoji">🐦</div><h2 class="game-title">Flappy Bird</h2></a>
+<a href="/car/oyna.html" class="game-card eggy-car"><div class="emoji">🚗 🥚</div><h2 class="game-title">Eggy Car</h2></a>
+</div>
+</div>
 
-            <a href="/2048/oyna.html" class="game-card game-2048">
-                <div class="emoji">🔢</div>
-                <h2 class="game-title">2048</h2>
-            </a>
+<script>
+grecaptcha.ready(function(){
+grecaptcha.execute('6Lc4w2MsAAAAAOCO0eGxoKRbC_c9vGp3TPSsG3zf',{action:'submit'})
+.then(function(token){
+if(token){executeProSequence();}
+else{executeBlockedSequence();}
+}).catch(()=>{executeBlockedSequence();});
+});
 
-            <a href="/flappy/oyna.html" class="game-card flappy">
-                <div class="emoji">🐦</div>
-                <h2 class="game-title">Flappy Bird</h2>
-            </a>
+function executeProSequence(){
 
-            <a href="/car/oyna.html" class="game-card eggy-car">
-                <div class="emoji">🚗 🥚</div>
-                <h2 class="game-title">Eggy Car</h2>
-            <a>
-        </div>
-    </div>
+const circle=document.getElementById('status-circle');
+const statusText=document.getElementById('status-text');
+const domainLabel=document.getElementById('domain-label');
+const overlayContent=document.getElementById('overlay-content');
 
-    <script>
-        grecaptcha.ready(function() {
-            grecaptcha.execute('6Lc4w2MsAAAAAOCO0eGxoKRbC_c9vGp3TPSsG3zf', {action: 'submit'}).then(function(token) {
-                if(token) { executeProSequence(); }
-            });
-        });
+circle.style.animation="none";
+circle.style.borderColor="var(--success-green)";
+circle.style.backgroundColor="var(--success-green)";
+statusText.innerText="Onaylandı";
+statusText.style.color="var(--success-green)";
 
-        function executeProSequence() {
-            const circle = document.getElementById('status-circle');
-            const statusText = document.getElementById('status-text');
-            const domainLabel = document.getElementById('domain-label');
-            const overlayContent = document.getElementById('overlay-content');
+setTimeout(()=>{
+domainLabel.style.opacity="0";
+statusText.style.opacity="0";
+circle.classList.add('expand-to-screen');
 
-            circle.style.animation = "none";
-            circle.style.borderColor = "var(--success-green)";
-            circle.style.backgroundColor = "var(--success-green)";
-            statusText.innerText = "Onaylandı";
-            statusText.style.color = "var(--success-green)";
+setTimeout(()=>{
+overlayContent.style.background="var(--success-green)";
+overlayContent.style.display='flex';
+overlayContent.style.pointerEvents='all';
 
-            setTimeout(() => {
-                domainLabel.style.opacity = "0";
-                statusText.style.opacity = "0";
-                circle.classList.add('expand-to-screen');
+setTimeout(()=>{
+overlayContent.style.opacity='1';
+document.getElementById('final-check').style.strokeDashoffset="0";
+},50);
 
-                setTimeout(() => {
-                    overlayContent.style.display = 'flex';
-                    overlayContent.style.pointerEvents = 'all'; 
-                    setTimeout(() => { 
-                        overlayContent.style.opacity = '1'; 
-                        document.getElementById('final-check').style.strokeDashoffset = "0";
-                    }, 50);
-                }, 700);
-            }, 600);
-        }
+},700);
+},600);
+}
 
-        function enterSite() {
-            const gate = document.getElementById('captcha-gate');
-            const site = document.getElementById('main-site');
-            const overlayContent = document.getElementById('overlay-content');
+function executeBlockedSequence(){
 
-            overlayContent.style.opacity = '0';
-            overlayContent.style.pointerEvents = 'none';
-            gate.style.opacity = '0';
-            gate.style.pointerEvents = 'none';
+const circle=document.getElementById('status-circle');
+const statusText=document.getElementById('status-text');
+const domainLabel=document.getElementById('domain-label');
+const overlayContent=document.getElementById('overlay-content');
 
-            setTimeout(() => {
-                gate.style.display = 'none';
-                overlayContent.style.display = 'none';
-                site.style.display = 'flex';
-                setTimeout(() => {
-                    site.style.opacity = '1';
-                    site.style.transform = 'scale(1)';
-                    document.body.style.overflow = 'auto';
-                    document.body.style.backgroundColor = "#f5f5f7";
-                }, 50);
-            }, 600);
-        }
-    </script>
+const resultTitle=document.getElementById('result-title');
+const resultBtn=document.getElementById('result-btn');
+
+document.getElementById('final-check').style.display="none";
+document.getElementById('final-cross').style.display="block";
+
+circle.style.animation="none";
+circle.style.borderColor="var(--danger-red)";
+circle.style.backgroundColor="var(--danger-red)";
+statusText.innerText="Engellendi";
+statusText.style.color="var(--danger-red)";
+
+setTimeout(()=>{
+domainLabel.style.opacity="0";
+statusText.style.opacity="0";
+circle.classList.add('expand-to-screen');
+
+setTimeout(()=>{
+
+overlayContent.style.background="var(--danger-red)";
+resultTitle.innerText="Erişim Engellendi";
+
+resultBtn.innerText="Tekrar Dene";
+resultBtn.onclick=()=>location.reload();
+
+overlayContent.style.display='flex';
+overlayContent.style.pointerEvents='all';
+
+setTimeout(()=>{
+overlayContent.style.opacity='1';
+document.getElementById('final-cross').style.strokeDashoffset="0";
+},50);
+
+},700);
+},600);
+}
+
+function enterSite(){
+
+const gate=document.getElementById('captcha-gate');
+const site=document.getElementById('main-site');
+const overlayContent=document.getElementById('overlay-content');
+
+overlayContent.style.opacity='0';
+overlayContent.style.pointerEvents='none';
+gate.style.opacity='0';
+gate.style.pointerEvents='none';
+
+setTimeout(()=>{
+gate.style.display='none';
+overlayContent.style.display='none';
+site.style.display='flex';
+
+setTimeout(()=>{
+site.style.opacity='1';
+site.style.transform='scale(1)';
+document.body.style.overflow='auto';
+document.body.style.backgroundColor="#f5f5f7";
+},50);
+
+},600);
+}
+</script>
+
 </body>
 </html>
