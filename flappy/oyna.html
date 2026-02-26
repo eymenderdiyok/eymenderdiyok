@@ -45,48 +45,6 @@
     <button class="fullscreen-btn" onclick="toggleFullScreen()">Tam Ekran</button>
   </div>
 </header>
-
-<div class="container">
-  <div id="lock-screen">
-    <div class="pass-card">
-      <h2>Oyun Kilitli</h2>
-      <input type="password" id="entry-pass" class="pass-input" placeholder="Şifreyi Girin">
-      <button class="submit-btn" onclick="unlockGame()">Oyna</button>
-      <p id="error-msg">Hatalı şifre, tekrar deneyin.</p>
-    </div>
-  </div>
-
-  <div id="game-wrapper">
-    <iframe id="game" src="data/index.html" allow="autoplay; fullscreen; gamepad"></iframe>
-  </div>
-</div>
-
-<script>
-  const MASTER_KEY = "534127";
-
-  function unlockGame() {
-    const input = document.getElementById('entry-pass').value;
-    const error = document.getElementById('error-msg');
-    const lockScreen = document.getElementById('lock-screen');
-    const gameWrapper = document.getElementById('game-wrapper');
-
-    if (input === MASTER_KEY) {
-      lockScreen.style.display = 'none';
-      gameWrapper.style.display = 'block';
-      setTimeout(() => {
-        gameWrapper.style.opacity = '1';
-        document.getElementById('game').focus();
-      }, 50);
-    } else {
-      error.style.display = 'block';
-      document.getElementById('entry-pass').value = '';
-    }
-  }
-
-  // Enter tuşu desteği
-  document.getElementById('entry-pass').addEventListener("keypress", function(e) {
-    if (e.key === "Enter") unlockGame();
-  });
   
 <div class="container">
   <div id="game-wrapper">
